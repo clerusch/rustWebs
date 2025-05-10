@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use super::types::{Node, Edge};
+use super::types::{Node, Edge, NodeType};
 
 #[derive(Debug)]
 pub struct Graph {
@@ -17,12 +17,13 @@ impl Graph {
         }
     }
 
-    pub fn add_node(&mut self, node_type: super::NodeType, phase: f64) -> usize {
+    pub fn add_node(&mut self, node_type: NodeType) -> usize {
         let id = self.next_id;
-        self.nodes.insert(id, Node { id, node_type, phase });
+        let node = Node { id, node_type };
+        self.nodes.insert(id, node);
         self.next_id += 1;
         id
-    }
+    }    
 
     pub fn add_edge(&mut self, source: usize, target: usize) {
         if self.nodes.contains_key(&source) && self.nodes.contains_key(&target) {

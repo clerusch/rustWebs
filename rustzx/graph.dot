@@ -1,5 +1,0 @@
-graph ZX {
-    0 [label="Z\n0.00", shape=circle];
-    1 [label="X\n1.00", shape=circle];
-    0 -- 1;
-}

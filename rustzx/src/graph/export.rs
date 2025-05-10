@@ -7,15 +7,15 @@ impl Graph {
         let mut output = String::from("graph ZX {\n");
 
         for node in self.nodes.values() {
-            let label = match node.node_type {
-                NodeType::ZSpider => "Z",
-                NodeType::XSpider => "X",
-                NodeType::Boundary => "B",
+            let label = match &node.node_type {
+                NodeType::ZSpider(phase) => format!("Z\\n{:.2}", phase),
+                NodeType::XSpider(phase) => format!("X\\n{:.2}", phase),
+                NodeType::Boundary => "B".to_string(),
             };
             let _ = writeln!(
                 output,
-                "    {} [label=\"{}\\n{:.2}\", shape=circle];",
-                node.id, label, node.phase
+                "    {} [label=\"{}\", shape=circle];",
+                node.id, label
             );
         }
 
