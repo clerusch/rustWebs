@@ -1,5 +1,6 @@
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub enum NodeType {
     ZSpider,
     XSpider,
@@ -14,6 +15,7 @@ pub struct Node {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct Edge {
     pub source: usize,
     pub target: usize,

@@ -7,7 +7,7 @@ pub struct Graph {
     pub edges: HashMap<(usize, usize), Edge>,
     next_id: usize,
 }
-
+#[allow(dead_code)]
 impl Graph {
     pub fn new() -> Self {
         Self {
