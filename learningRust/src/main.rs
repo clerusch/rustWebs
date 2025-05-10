@@ -1,23 +1,26 @@
+trait Animal {
+    fn speak(&self);
+}
+struct Dog;
+struct Cat;
+
+impl Animal for Dog {
+    fn speak(&self) {
+        println!("Woof!");
+    }
+}
+impl Animal for Cat {
+    fn speak(&self) {
+        println!("Meow!");
+    }
+}
+fn make_animal_speak(animal: &dyn Animal){
+    animal.speak();
+}
 fn main() {
-    struct Person {
-        name: String,
-        age: u32,
-    }
-    impl Person {
-        fn new(name: String, age: u32) -> Self {
-            Self { name, age }
-        }
-    
-        fn greet(&self) {
-            println!("Hello, my name is {}!", self.name);
-        }
-    }
-    
-    let henri = Person::new("Henri".to_string(), 24);
-    let clemens = Person{
-        name: "clemens".to_string(), 
-        age: 26,
-    };
-    println!("Mein alter ist {0} und mein Name ist {1}", clemens.age, clemens.name);
-    henri.greet();
+    let dog = Dog;
+    let cat = Cat;
+
+    make_animal_speak(&dog);
+    make_animal_speak(&cat);
 }
