@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Run Rust Project",
+        "type": "shell",
+        "command": "cargo run",
+        "problemMatcher": [],
+        "isBackground": true,
+        "presentation": {
+          "reveal": "silent",   // Don't auto-switch to terminal
+          "focus": false        // Don't focus terminal
+        }
+      }
+    ]
+  }
+  
