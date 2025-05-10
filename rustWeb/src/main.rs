@@ -3,12 +3,12 @@ mod tikz_export;
 use std::env;
 use quizx::{graph::GraphLike, hash_graph::Graph};
 use std::fs::write;
-use quizx::hash_graph::VType::Z;
+use quizx::hash_graph::VType::{X,Z};
 fn main(){
     println!("Running from: {:?}", env::current_dir().unwrap());
     let mut g = Graph::new();
     let a = g.add_vertex(Z);
-    let b = g.add_vertex(Z);
+    let b = g.add_vertex(X);
     g.add_edge(a, b);
     // let g = test_fusion::create_chain(10);
     // let dot = g.to_dot();
