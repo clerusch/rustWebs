@@ -1,0 +1,96 @@
+use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
+pub enum NodeType {
+    ZSpider,
+    XSpider,
+    Boundary,
+}
+#[derive(Debug, Clone)]
+pub struct Node {
+    pub id: usize,
+    pub node_type: NodeType,
+    pub phase: f64,
+}
+#[derive(Debug)]
+pub struct Edge {
+    pub source: usize,
+    pub target: usize,
+}
+#[derive(Debug)]
+pub struct Graph {
+    pub nodes: HashMap<usize, Node>,
+    pub edges: HashMap<(usize,usize), Edge>,
+    next_id: usize,
+}
+// impl Graph {
+//     //Create empty graph
+//     pub fn new() -> Self {
+//         Self {
+//             nodes: HashMap::new(),
+//             edges: HashMap::new(),
+//             next_id: 0,
+//         }
+//     }
+//     pub fn add_node(&mut self, node_type: NodeType, phase: f64) -> usize {
+//         let id = self.next_id;
+//         let node = Node { id, node_type, phase };
+//         self.nodes.insert(id, node);
+//         self.next_id += 1;
+//         id
+//     }
+
+//     fn edge_key(a: usize, b: usize) -> (usize, usize) {
+//         if a < b { (a, b) } else { (b, a) }
+//     }
+//     pub fn add_edge(&mut self, source: usize, target: usize) {
+//         if self.nodes.contains_key(&source) 
+//         && self.nodes.contains_key(&target) {
+//             let key = Self::edge_key(source, target);
+//             self.edges.insert(key, Edge { source, target });
+//         } else {
+//             panic!("Attempted to connect non-existent nodes");
+//         }
+//     }
+//     pub fn has_edge(&self, a: usize, b: usize) -> bool {
+//         self.edges.contains_key(&Self::edge_key(a, b))
+//     }
+    
+//     pub fn remove_edge(&mut self, a: usize, b: usize) {
+//         self.edges.remove(&Self::edge_key(a, b));
+//     }
+    
+//     pub fn remove_node(&mut self, id:usize) {
+//         if self.nodes.remove(&id).is_none() {
+//             panic!("Node {id} does not exist");
+//         }
+//         self.edges.retain(|&(a,b), _| a!=id && b!=id);
+//     }
+//     pub fn to_dot(&self) -> String {
+//         let mut output = String::from("graph ZX {\n");
+
+//         // Node definitions
+//         for node in self.nodes.values() {
+//             let label = match node.node_type {
+//                 NodeType::ZSpider => "Z",
+//                 NodeType::XSpider => "X",
+//                 NodeType::Boundary => "B",
+//             };
+//             let _ = writeln!(
+//                 output,
+//                 "    {} [label=\"{}\\n{:.2}\", shape=circle];",
+//                 node.id, label, node.phase
+//             );
+//         }
+
+//         // Edge definitions
+//         for ((a, b), _) in &self.edges {
+//             let _ = writeln!(output, "    {} -- {};", a, b);
+//         }
+
+//         output.push_str("}\n");
+//         output
+//     }
+// }
+
+
