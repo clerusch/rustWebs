@@ -1,0 +1,8 @@
+/home/clemens/Documents/rustStuff/rustWeb/target/debug/deps/libnum_rational-209ebc9efc50d0c6.rmeta: /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-rational-0.4.2/src/lib.rs /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-rational-0.4.2/src/pow.rs
+
+/home/clemens/Documents/rustStuff/rustWeb/target/debug/deps/libnum_rational-209ebc9efc50d0c6.rlib: /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-rational-0.4.2/src/lib.rs /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-rational-0.4.2/src/pow.rs
+
+/home/clemens/Documents/rustStuff/rustWeb/target/debug/deps/num_rational-209ebc9efc50d0c6.d: /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-rational-0.4.2/src/lib.rs /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-rational-0.4.2/src/pow.rs
+
+/home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-rational-0.4.2/src/lib.rs:
+/home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-rational-0.4.2/src/pow.rs:
