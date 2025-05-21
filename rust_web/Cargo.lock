@@ -898,11 +898,13 @@ name = "rust_web"
 version = "0.1.0"
 dependencies = [
  "num",
+ "num-complex",
  "num-rational",
  "num-traits",
  "quizx",
  "serde_json",
  "tempfile",
+ "thiserror",
 ]
 
 [[package]]
