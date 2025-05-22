@@ -1,218 +1,94 @@
-//! A Rust implementation of Pauli operator utilities for quantum computing.
-//! Inspired by the Python `pauliweb` module but designed for Rust and `quizx`.
+use std::collections::HashMap;
+use serde::{Serialize, Deserialize};
 
-// use std::collections::HashMap;
-use std::fmt;
-// use num_complex::Complex64;
-use quizx::circuit::*;
-// use quizx::gate::*;
-use thiserror::Error;
-
-/// Represents a single-qubit Pauli operator (I, X, Y, Z)
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Pauli {
-    I,
     X,
     Y,
     Z,
 }
 
-/// Represents a Pauli string (tensor product of Pauli operators)
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PauliString {
-    ops: Vec<Pauli>,
-    phase: i8,  // 0, 1, 2, 3 representing 1, i, -1, -i
+#[derive(Debug, Default)]
+pub struct PauliWeb {
+    // Maps edge (from, to) to Pauli operator
+    // Note: from < to to ensure consistent ordering
+    edge_operators: HashMap<(usize, usize), Pauli>,
 }
 
-/// Error type for Pauli operations
-#[derive(Error, Debug)]
-pub enum PauliError {
-    #[error("Qubit index out of bounds")]
-    QubitOutOfBounds,
-    #[error("Incompatible Pauli string lengths")]
-    IncompatibleLengths,
-}
-
-impl PauliString {
-    /// Create a new Pauli string of identity operators
-    pub fn new(n: usize) -> Self {
-        PauliString {
-            ops: vec![Pauli::I; n],
-            phase: 0,
-        }
+impl PauliWeb {
+    pub fn new() -> Self {
+        Self::default()
     }
 
-    /// Apply a Pauli operator to a specific qubit
-    pub fn set(&mut self, qubit: usize, op: Pauli) -> Result<(), PauliError> {
-        if qubit >= self.ops.len() {
-            return Err(PauliError::QubitOutOfBounds);
-        }
-        self.ops[qubit] = op;
-        Ok(())
-    }
-    
-    /// Get the phase of the Pauli string (0, 1, 2, 3 representing 1, i, -1, -i)
-    pub fn phase(&self) -> i8 {
-        self.phase
+    pub fn set_edge(&mut self, from: usize, to: usize, pauli: Pauli) {
+        self.edge_operators.insert((from.min(to), from.max(to)), pauli);
     }
 
-    /// Multiply two Pauli strings
-    pub fn multiply(&self, other: &PauliString) -> Result<Self, PauliError> {
-        if self.ops.len() != other.ops.len() {
-            return Err(PauliError::IncompatibleLengths);
-        }
-
-        let mut result = self.clone();
-        let mut phase_shift = 0;
-
-        for (i, (a, b)) in self.ops.iter().zip(&other.ops).enumerate() {
-            match (a, b) {
-                (Pauli::I, _) => result.ops[i] = *b,
-                (_, Pauli::I) => (),
-                (Pauli::X, Pauli::X) | (Pauli::Y, Pauli::Y) | (Pauli::Z, Pauli::Z) => {
-                    result.ops[i] = Pauli::I;
-                }
-                (Pauli::X, Pauli::Y) => {
-                    result.ops[i] = Pauli::Z;
-                    phase_shift += 1;
-                }
-                (Pauli::Y, Pauli::Z) => {
-                    result.ops[i] = Pauli::X;
-                    phase_shift += 1;
-                }
-                (Pauli::Z, Pauli::X) => {
-                    result.ops[i] = Pauli::Y;
-                    phase_shift += 1;
-                }
-                (Pauli::Y, Pauli::X) => {
-                    result.ops[i] = Pauli::Z;
-                    phase_shift -= 1;
-                }
-                (Pauli::Z, Pauli::Y) => {
-                    result.ops[i] = Pauli::X;
-                    phase_shift -= 1;
-                }
-                (Pauli::X, Pauli::Z) => {
-                    result.ops[i] = Pauli::Y;
-                    phase_shift -= 1;
-                }
-            }
-        }
-
-        result.phase = (self.phase + other.phase + phase_shift).rem_euclid(4);
-        Ok(result)
+    pub fn get_edge(&self, from: usize, to: usize) -> Option<Pauli> {
+        self.edge_operators.get(&(from.min(to), from.max(to))).copied()
     }
 
-    /// Check if two Pauli strings commute
-    pub fn commutes_with(&self, other: &PauliString) -> Result<bool, PauliError> {
-        if self.ops.len() != other.ops.len() {
-            return Err(PauliError::IncompatibleLengths);
-        }
-
-        let mut anticommute_count = 0;
-
-        for (a, b) in self.ops.iter().zip(&other.ops) {
-            match (a, b) {
-                (Pauli::I, _) | (_, Pauli::I) => (),
-                (Pauli::X, Pauli::Y) | (Pauli::Y, Pauli::X) => anticommute_count += 1,
-                (Pauli::X, Pauli::Z) | (Pauli::Z, Pauli::X) => anticommute_count += 1,
-                (Pauli::Y, Pauli::Z) | (Pauli::Z, Pauli::Y) => anticommute_count += 1,
-                _ => (),
-            }
-        }
-
-        Ok(anticommute_count % 2 == 0)
-    }
-
-    /// Convert to a circuit using quizx gates
-    pub fn to_circuit(&self) -> Circuit {
-        let mut circuit = Circuit::new(self.ops.len());
-        
-        for (i, pauli) in self.ops.iter().enumerate() {
-            match pauli {
-                Pauli::X => {
-                    circuit.add_gate("x", vec![i]);  // Use lowercase 'x' for QASM compatibility
-                }
-                Pauli::Y => {
-                    // Y = iXZ, so we need to implement this as Z followed by X
-                    circuit.add_gate("z", vec![i]);  // Use lowercase 'z' for QASM compatibility
-                    circuit.add_gate("x", vec![i]);  // Use lowercase 'x' for QASM compatibility
-                }
-                Pauli::Z => {
-                    circuit.add_gate("z", vec![i]);  // Use lowercase 'z' for QASM compatibility
-                }
-                Pauli::I => (),
-            }
-        }
-
-        circuit
+    pub fn get_edge_color(&self, from: usize, to: usize) -> Option<&'static str> {
+        self.get_edge(from, to).map(|pauli| match pauli {
+            Pauli::X => "red",
+            Pauli::Y => "blue",
+            Pauli::Z => "green",
+        })
     }
 }
 
-impl fmt::Display for Pauli {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Pauli::I => "I",
-                Pauli::X => "X",
-                Pauli::Y => "Y",
-                Pauli::Z => "Z",
-            }
-        )
-    }
-}
-
-impl fmt::Display for PauliString {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let phase_str = match self.phase {
-            0 => "",
-            1 => "i",
-            2 => "-",
-            3 => "-i",
-            _ => unreachable!(),
-        };
-        
-        write!(f, "{}", phase_str)?;
-        for pauli in &self.ops {
-            write!(f, "{}", pauli)?;
-        }
-        Ok(())
-    }
-}
-
-/// Example usage
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_pauli_multiplication() -> Result<(), PauliError> {
-        // Test X * Y = iZ
-        let mut x = PauliString::new(1);
-        x.set(0, Pauli::X)?;
-        
-        let mut y = PauliString::new(1);
-        y.set(0, Pauli::Y)?;
-        
-        let result = x.multiply(&y)?;
-        assert_eq!(result.to_string(), "iZ");
-        
-        Ok(())
+    fn test_new_pauliweb() {
+        let pw = PauliWeb::new();
+        assert!(pw.edge_operators.is_empty());
     }
 
     #[test]
-    fn test_commutation() -> Result<(), PauliError> {
-        let mut x = PauliString::new(2);
-        x.set(0, Pauli::X)?;
+    fn test_set_and_get_edge() {
+        let mut pw = PauliWeb::new();
         
-        let mut z = PauliString::new(2);
-        z.set(1, Pauli::Z)?;
+        // Test setting and getting an edge
+        pw.set_edge(1, 2, Pauli::X);
+        assert_eq!(pw.get_edge(1, 2), Some(Pauli::X));
+        assert_eq!(pw.get_edge(2, 1), Some(Pauli::X)); // Should work in both directions
         
-        // X ⊗ I and I ⊗ Z should commute
-        assert!(x.commutes_with(&z)?);
+        // Test updating an edge
+        pw.set_edge(1, 2, Pauli::Z);
+        assert_eq!(pw.get_edge(1, 2), Some(Pauli::Z));
         
-        Ok(())
+        // Test non-existent edge
+        assert_eq!(pw.get_edge(1, 3), None);
+    }
+
+    #[test]
+    fn test_get_edge_color() {
+        let mut pw = PauliWeb::new();
+        
+        // Test colors for each Pauli operator
+        pw.set_edge(1, 2, Pauli::X);
+        pw.set_edge(2, 3, Pauli::Y);
+        pw.set_edge(3, 4, Pauli::Z);
+        
+        assert_eq!(pw.get_edge_color(1, 2), Some("red"));
+        assert_eq!(pw.get_edge_color(2, 3), Some("blue"));
+        assert_eq!(pw.get_edge_color(3, 4), Some("green"));
+        assert_eq!(pw.get_edge_color(4, 5), None); // Non-existent edge
+    }
+
+    #[test]
+    fn test_edge_ordering() {
+        let mut pw = PauliWeb::new();
+        
+        // Test that edge ordering doesn't matter for get/set
+        pw.set_edge(2, 1, Pauli::X);
+        assert_eq!(pw.get_edge(1, 2), Some(Pauli::X));
+        
+        // Test that updating with different order works
+        pw.set_edge(1, 2, Pauli::Z);
+        assert_eq!(pw.get_edge(2, 1), Some(Pauli::Z));
     }
 }
