@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["create_graph","detection_webs","f2linalg","graph_loader","graph_visualizer","pauliweb","tikz_export"],"struct":["Graph"],"trait":["GraphLike"]};

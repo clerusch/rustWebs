@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"trait":["FromPhase","Sqrt2"]};

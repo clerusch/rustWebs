@@ -1,0 +1,10 @@
+/home/clemens/Documents/rustStuff/rust_web/target/debug/deps/libderive_more-fcd177bf9fac427f.rmeta: /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/lib.rs /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/vendor/mod.rs /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/vendor/thiserror/mod.rs /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/vendor/thiserror/aserror.rs
+
+/home/clemens/Documents/rustStuff/rust_web/target/debug/deps/libderive_more-fcd177bf9fac427f.rlib: /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/lib.rs /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/vendor/mod.rs /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/vendor/thiserror/mod.rs /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/vendor/thiserror/aserror.rs
+
+/home/clemens/Documents/rustStuff/rust_web/target/debug/deps/derive_more-fcd177bf9fac427f.d: /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/lib.rs /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/vendor/mod.rs /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/vendor/thiserror/mod.rs /home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/vendor/thiserror/aserror.rs
+
+/home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/lib.rs:
+/home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/vendor/mod.rs:
+/home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/vendor/thiserror/mod.rs:
+/home/clemens/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/derive_more-1.0.0/src/vendor/thiserror/aserror.rs:

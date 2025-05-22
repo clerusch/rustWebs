@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"trait":["CompareTensors","QubitOps","TensorElem","ToTensor"],"type":["Tensor","Tensor64","TensorF"]};

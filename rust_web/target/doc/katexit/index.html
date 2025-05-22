@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Crate docs.rs"><title>katexit - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-6c3ea77c.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="katexit" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0 (05f9846f8 2025-03-31)" data-channel="1.86.0" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../static.files/storage-3a5871a4.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-4d63596a.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../katexit/index.html">katexit</a><span class="version">0.1.5</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#usage" title="Usage">Usage</a></li><li><a href="#how-it-works" title="How it works">How it works</a></li><li><a href="#links" title="Links">Links</a></li></ul><h3><a href="#attributes">Crate Items</a></h3><ul class="block"><li><a href="#attributes" title="Attribute Macros">Attribute Macros</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>katexit</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/katexit/lib.rs.html#1-67">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p><a href="https://crates.io/crates/katexit"><img src="https://img.shields.io/crates/v/katexit.svg" alt="Crate" /></a>
+<a href="https://docs.rs/katexit"><img src="https://docs.rs/katexit/badge.svg" alt="docs.rs" /></a></p>
+<p>Insert KaTeX autorender script into rustdoc</p>
+<h3 id="usage"><a class="doc-anchor" href="#usage">§</a>Usage</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#[cfg_attr(doc, katexit::katexit)]
+</span><span class="doccomment">/// We can write $\LaTeX$ expressions
+///
+/// Display style
+/// -------------
+///
+/// $$
+/// c = \\pm\\sqrt{a^2 + b^2}
+/// $$
+</span><span class="kw">pub fn </span>my_func() {}</code></pre></div>
+<p>See rendered result on <a href="https://docs.rs/katexit-example/0.1.0/katexit_example/fn.my_func.html">docs.rs</a>.</p>
+<p>On nightly rustc, you can use <code>#![katexit::katexit]</code> for module level document:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#![cfg_attr(doc, feature(prelude_import, custom_inner_attributes))]
+#![cfg_attr(doc, katexit::katexit)]
+</span><span class="doccomment">//! Module level document example with $\KaTeX$!</span></code></pre></div>
+<p>Be sure that <code>cargo test</code> will runs <code>rustdoc</code> for executing doc-test,
+and thus requires nightly compiler.
+See <a href="./katexit-example-nightly">katexit-example-nightly</a> for detail.</p>
+<h3 id="how-it-works"><a class="doc-anchor" href="#how-it-works">§</a>How it works</h3>
+<p><code>#[katexit]</code> proc-macro inserts <a href="https://katex.org/docs/autorender.html">KaTeX autorender script</a> as <code>#[doc = "{script}"]</code>.
+Since the markdown to HTML translator of rustdoc do not touch HTML partitions embedded in markdown,
+they will be passed as it is to the browser.
+The autorender script starts rendering the math expression enclosed by <code>$</code> written in the document section
+when you open the page generated by rustdoc, i.e. this does not work offline.</p>
+<h3 id="links"><a class="doc-anchor" href="#links">§</a>Links</h3>
+<ul>
+<li><a href="https://github.com/paulkernfeld/rustdoc-katex-demo">rustdoc-katex-demo</a> and similar demo projects
+<ul>
+<li>They uses <a href="https://doc.rust-lang.org/rustdoc/command-line-arguments.html#--html-in-header-include-more-html-in-head"><code>--html-in-header</code> option in rustdoc</a> to inserts <a href="autorender">KaTeX auto-render script</a>. But it requires some complicated setting in Cargo.toml.</li>
+</ul>
+</li>
+<li><a href="https://github.com/mersinvald/aquamarine">aquamarine</a>
+<ul>
+<li>The idea using proc-macro for cargo-doc is based on this crate.</li>
+</ul>
+</li>
+<li><a href="https://github.com/xu-cheng/katex-rs">katex-rs</a>
+<ul>
+<li>This is “Rust bindings to KaTeX”. This crate aims to run KaTeX using <a href="https://bellard.org/quickjs/">QuickJS</a> without external dependencies.</li>
+</ul>
+</li>
+</ul>
+</div></details><h2 id="attributes" class="section-header">Attribute Macros<a href="#attributes" class="anchor">§</a></h2><dl class="item-table"><dt><a class="attr" href="attr.katexit.html" title="attr katexit::katexit">katexit</a></dt></dl></section></div></main></body></html>

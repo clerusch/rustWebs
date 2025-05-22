@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["clifford_simp","edge_simp","flow_simp","full_simp","fuse_gadgets","gen_pivot_simp","id_simp","interior_clifford_simp","local_comp_simp","pivot_simp","scalar_simp","spider_simp","vertex_simp"]};

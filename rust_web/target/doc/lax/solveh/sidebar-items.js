@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["BkWork","InvhWork"],"trait":["BkWorkImpl","InvhWorkImpl","SolvehImpl"]};

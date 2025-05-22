@@ -8,26 +8,31 @@ pub enum Pauli {
     Z,
 }
 
-#[derive(Debug, Default)]
+/// Represents a Pauli web in a ZX diagram
+#[derive(Debug, Default, Clone)]
 pub struct PauliWeb {
-    // Maps edge (from, to) to Pauli operator
-    // Note: from < to to ensure consistent ordering
-    edge_operators: HashMap<(usize, usize), Pauli>,
+    /// Maps edge (from, to) to Pauli operator
+    /// Note: from < to to ensure consistent ordering
+    pub edge_operators: HashMap<(usize, usize), Pauli>,
 }
 
 impl PauliWeb {
+    /// Create a new empty PauliWeb
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Set the Pauli operator for an edge between two nodes
     pub fn set_edge(&mut self, from: usize, to: usize, pauli: Pauli) {
         self.edge_operators.insert((from.min(to), from.max(to)), pauli);
     }
 
+    /// Get the Pauli operator for an edge between two nodes
     pub fn get_edge(&self, from: usize, to: usize) -> Option<Pauli> {
         self.edge_operators.get(&(from.min(to), from.max(to))).copied()
     }
 
+    /// Get the color to use when drawing an edge
     pub fn get_edge_color(&self, from: usize, to: usize) -> Option<&'static str> {
         self.get_edge(from, to).map(|pauli| match pauli {
             Pauli::X => "red",

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["draw_graph_with_pauliweb","graph_to_png","to_dot_with_positions"]};

@@ -1,0 +1,1 @@
+searchState.loadedDescShard("openblas_src", 0, "Source of BLAS and LAPACK via OpenBLAS.")

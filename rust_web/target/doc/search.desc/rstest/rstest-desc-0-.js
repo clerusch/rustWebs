@@ -1,0 +1,1 @@
+searchState.loadedDescShard("rstest", 0, "This crate will help you to write simpler tests by …\nDefine a fixture that you can use in all <code>rstest</code>’s test …\nThe attribute that you should use for your tests. Your …")

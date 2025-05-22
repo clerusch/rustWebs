@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["DetectionWebsError"],"struct":["DetectionWebs"]};

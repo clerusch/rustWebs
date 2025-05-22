@@ -62,7 +62,8 @@ impl fmt::Display for F2 {
 /// A matrix over F2 (the field with 2 elements)
 #[derive(Clone, Debug)]
 pub struct Mat2 {
-    data: Vec<Vec<F2>>,
+    /// The underlying data of the matrix, stored as a vector of rows
+    pub data: Vec<Vec<F2>>,
 }
 
 impl Mat2 {
@@ -113,6 +114,34 @@ impl Mat2 {
         } else {
             self.data[0].len()
         }
+    }
+    
+    /// Get the value at the specified position
+    pub fn get(&self, row: usize, col: usize) -> Option<F2> {
+        self.data.get(row).and_then(|r| r.get(col)).copied()
+    }
+    
+    /// Set the value at the specified position
+    pub fn set(&mut self, row: usize, col: usize, value: F2) -> bool {
+        if let Some(row_data) = self.data.get_mut(row) {
+            if let Some(cell) = row_data.get_mut(col) {
+                *cell = value;
+                return true;
+            }
+        }
+        false
+    }
+    
+    /// Vertically stack this matrix with another matrix
+    pub fn vstack(&self, other: &Mat2) -> Mat2 {
+        if self.cols() != other.cols() {
+            panic!("Cannot stack matrices with different number of columns");
+        }
+        
+        let mut new_data = self.data.clone();
+        new_data.extend_from_slice(&other.data);
+        
+        Mat2 { data: new_data }
     }
 
     /// Add row r0 to row r1

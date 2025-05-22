@@ -3,6 +3,8 @@ use std::process::Command;
 use std::collections::HashMap;
 use num::{Rational64, FromPrimitive};
 use quizx::graph::GraphLike;
+use crate::pauliweb::PauliWeb;
+use ordered_float::OrderedFloat;
 
 // Helper function to format phase values with fractional notation when possible
 fn format_phase(phase: f64) -> String {
@@ -42,8 +44,6 @@ fn format_phase(phase: f64) -> String {
         fraction
     }
 }
-use crate::pauliweb::PauliWeb;
-use ordered_float::OrderedFloat;
 
 pub fn to_dot_with_positions<G: GraphLike>(
     graph: &G, 
@@ -179,6 +179,52 @@ pub fn graph_to_png<G: GraphLike>(
             "neato command failed",
         ))
     }
+}
+
+/// Draw a graph with Pauli web overlaid and save to file
+/// 
+/// # Arguments
+/// * `graph` - The graph to draw
+/// * `pauli_web` - The Pauli web to overlay on the graph
+/// * `output_path` - Path to save the output SVG file
+/// 
+/// # Returns
+/// * `Result<(), String>` - Ok if successful, Err with error message otherwise
+pub fn draw_graph_with_pauliweb<G: GraphLike>(
+    graph: &G,
+    pauli_web: &PauliWeb,
+    output_path: &str,
+) -> Result<(), String> {
+    // Create a temporary DOT file
+    let dot_path = format!("{}.dot", output_path);
+    let dot_content = to_dot_with_positions(graph, Some(pauli_web), false);
+    
+    // Write DOT content to file
+    std::fs::write(&dot_path, dot_content)
+        .map_err(|e| format!("Failed to write DOT file: {}", e))?;
+    
+    // Run Graphviz to generate SVG
+    let output = Command::new("dot")
+        .arg("-Tsvg")
+        .arg(&dot_path)
+        .output()
+        .map_err(|e| format!("Failed to execute dot command: {}", e))?;
+    
+    if !output.status.success() {
+        return Err(format!(
+            "Graphviz failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+    
+    // Write SVG to output file
+    std::fs::write(output_path, &output.stdout)
+        .map_err(|e| format!("Failed to write SVG file: {}", e))?;
+    
+    // Clean up temporary DOT file
+    let _ = std::fs::remove_file(dot_path);
+    
+    Ok(())
 }
 
 #[cfg(test)]

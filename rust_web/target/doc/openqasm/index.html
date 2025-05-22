@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This crate implements a parser, type-checker and translator for OpenQASM 2.0."><title>openqasm - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-6c3ea77c.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="openqasm" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0 (05f9846f8 2025-03-31)" data-channel="1.86.0" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../static.files/storage-3a5871a4.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-4d63596a.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../openqasm/index.html">openqasm</a><span class="version">0.1.2</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#parsing" title="Parsing">Parsing</a></li><li><a href="#type-checking" title="Type-Checking">Type-Checking</a></li><li><a href="#translating" title="Translating">Translating</a></li><li><a href="#error-handling" title="Error Handling">Error Handling</a></li><li><a href="#features" title="Features">Features</a></li></ul><h3><a href="#reexports">Crate Items</a></h3><ul class="block"><li><a href="#reexports" title="Re-exports">Re-exports</a></li><li><a href="#modules" title="Modules">Modules</a></li><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#traits" title="Traits">Traits</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>openqasm</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/openqasm/lib.rs.html#1-234">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This crate implements a parser, type-checker and translator for OpenQASM 2.0.</p>
+<h4 id="parsing"><a class="doc-anchor" href="#parsing">§</a>Parsing</h4>
+<p>The main interface for parsing is the <code>parser::Parser</code> struct, and this
+produces either a <code>ast::Program</code> or a list of <code>parser::ParseError</code>s.
+Example Usage:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>cache = SourceCache::new();
+<span class="kw">let </span><span class="kw-2">mut </span>parser = Parser::new(<span class="kw-2">&amp;mut </span>cache);
+parser.parse_file(<span class="string">"test.qasm"</span>);
+parser.parse_source(<span class="string">"
+    OPENQASM 2.0;
+    qreg a;
+    creg b;
+    cx a, b;
+"</span>);
+
+<span class="kw">match </span>parser.done().to_errors() {
+    <span class="prelude-val">Ok</span>(program) =&gt; ..., <span class="comment">// do something with this
+    </span><span class="prelude-val">Err</span>(errors) =&gt; errors.print(<span class="kw-2">&amp;mut </span>cache).unwrap()
+}</code></pre></div>
+<h4 id="type-checking"><a class="doc-anchor" href="#type-checking">§</a>Type-Checking</h4>
+<p>Once you have a <code>Program</code>, you can type-check it with the
+<code>ast::Program::type_check</code> method. This detects many types of
+errors before translation.</p>
+<p>Example Usage:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>cache = SourceCache::new();
+<span class="kw">let </span>program: Program = ...; <span class="comment">// obtain a program somehow
+
+</span><span class="kw">if let </span><span class="prelude-val">Err</span>(errors) = program.type_check().to_errors() {
+    errors.print(<span class="kw-2">&amp;mut </span>cache).unwrap();
+}</code></pre></div>
+<h4 id="translating"><a class="doc-anchor" href="#translating">§</a>Translating</h4>
+<p>There are three different interfaces for translating parsed
+programs into different formats:</p>
+<ol>
+<li>
+<p><code>Linearize</code>/<code>GateWriter</code> is the high-level interface, and converts a
+program to a linear list of primitive and opaque gates, computing
+all the parameters and substituting arguments.</p>
+</li>
+<li>
+<p><code>ProgramVisitor</code>/<code>ExprVisitor</code> is the low-level interface, and just walks the
+AST, with user-defined callbacks for definitions, statements etc.</p>
+</li>
+</ol>
+<p>Example Usage:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">let </span>program = ...; <span class="comment">// acquire a program from somewhere.
+</span>program.type_check().unwrap(); <span class="comment">// make sure to type check.
+</span><span class="kw">let </span><span class="kw-2">mut </span>l = Linearize::new(...); <span class="comment">// linearize into into someoutput.
+</span>l.visit_program(<span class="kw-2">&amp;</span>program).unwrap();</code></pre></div>
+<h4 id="error-handling"><a class="doc-anchor" href="#error-handling">§</a>Error Handling</h4>
+<p>Specific error types for each process (parsing, checking etc.)
+are provided. However, if you don’t need to handle these individually,
+you can use <code>GenericError</code> trait and <code>GenericError::to_errors</code> to convert
+and <code>Result&lt;_, SomeSpecificError&gt;</code> into a generic <code>Result&lt;_, Errors&gt;</code> type.
+This can then be handled, printed or converted to a <code>Report</code> as detailed below.</p>
+<h4 id="features"><a class="doc-anchor" href="#features">§</a>Features</h4>
+<p>The <code>ariadne</code> feature is disabled by default and allows
+pretty-printing of errors using the <code>ariadne</code> crate by providing
+<code>to_report</code> functions on all error types, as well as <code>Errors::eprint</code>/<code>print</code>.</p>
+<p>The <code>pretty</code> feature is disabled by default and allows pretty-printing of
+AST objects using the <code>pretty</code> crate. This will implement the <code>pretty::Pretty</code>
+trait on these objects, and also provides the <code>to_pretty</code> method to easily render
+to a string.</p>
+<p>The <code>serde</code> feature is disabled by default and implements <code>serde::Serialize</code>
+and <code>serde::Deserialize</code> for all the AST types.</p>
+</div></details><h2 id="reexports" class="section-header">Re-exports<a href="#reexports" class="anchor">§</a></h2><dl class="item-table reexports"><dt id="reexport.Decl"><code>pub use ast::<a class="enum" href="ast/enum.Decl.html" title="enum openqasm::ast::Decl">Decl</a>;</code></dt><dt id="reexport.Expr"><code>pub use ast::<a class="enum" href="ast/enum.Expr.html" title="enum openqasm::ast::Expr">Expr</a>;</code></dt><dt id="reexport.Program"><code>pub use ast::<a class="struct" href="ast/struct.Program.html" title="struct openqasm::ast::Program">Program</a>;</code></dt><dt id="reexport.Reg"><code>pub use ast::<a class="struct" href="ast/struct.Reg.html" title="struct openqasm::ast::Reg">Reg</a>;</code></dt><dt id="reexport.Span"><code>pub use ast::<a class="struct" href="ast/struct.Span.html" title="struct openqasm::ast::Span">Span</a>;</code></dt><dt id="reexport.Stmt"><code>pub use ast::<a class="enum" href="ast/enum.Stmt.html" title="enum openqasm::ast::Stmt">Stmt</a>;</code></dt><dt id="reexport.Symbol"><code>pub use ast::<a class="struct" href="ast/struct.Symbol.html" title="struct openqasm::ast::Symbol">Symbol</a>;</code></dt><dt id="reexport.Parser"><code>pub use parser::<a class="struct" href="parser/struct.Parser.html" title="struct openqasm::parser::Parser">Parser</a>;</code></dt><dt id="reexport.SourceCache"><code>pub use parser::<a class="struct" href="parser/struct.SourceCache.html" title="struct openqasm::parser::SourceCache">SourceCache</a>;</code></dt><dt id="reexport.ExprVisitor"><code>pub use translate::<a class="trait" href="translate/trait.ExprVisitor.html" title="trait openqasm::translate::ExprVisitor">ExprVisitor</a>;</code></dt><dt id="reexport.GateWriter"><code>pub use translate::<a class="trait" href="translate/trait.GateWriter.html" title="trait openqasm::translate::GateWriter">GateWriter</a>;</code></dt><dt id="reexport.Linearize"><code>pub use translate::<a class="struct" href="translate/struct.Linearize.html" title="struct openqasm::translate::Linearize">Linearize</a>;</code></dt><dt id="reexport.ProgramVisitor"><code>pub use translate::<a class="trait" href="translate/trait.ProgramVisitor.html" title="trait openqasm::translate::ProgramVisitor">ProgramVisitor</a>;</code></dt><dt id="reexport.Value"><code>pub use translate::<a class="struct" href="translate/struct.Value.html" title="struct openqasm::translate::Value">Value</a>;</code></dt></dl><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="ast/index.html" title="mod openqasm::ast">ast</a></dt><dt><a class="mod" href="parser/index.html" title="mod openqasm::parser">parser</a></dt><dt><a class="mod" href="translate/index.html" title="mod openqasm::translate">translate</a></dt><dt><a class="mod" href="typing/index.html" title="mod openqasm::typing">typing</a></dt></dl><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Errors.html" title="struct openqasm::Errors">Errors</a></dt><dd>Represents a collection of generic errors.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.Error.html" title="enum openqasm::Error">Error</a></dt><dd>A generic error type for this crate.
+This collects all the error types used in this crate
+into one enum, for generic handling.</dd></dl><h2 id="traits" class="section-header">Traits<a href="#traits" class="anchor">§</a></h2><dl class="item-table"><dt><a class="trait" href="trait.GenericError.html" title="trait openqasm::GenericError">Generic<wbr>Error</a></dt><dd>A trait to convert a specific result type into a generic one.
+This lets you convert <code>Result&lt;T, E&gt;</code> or <code>Result&lt;T, Vec&lt;E&gt;&gt;</code> into
+<code>Result&lt;T, Errors&gt;</code> for any error type <code>E</code> defined in this library.
+In this way you can ignore the specific type of error when you don’t
+need to handle them explicitly (which is most of the time).</dd></dl></section></div></main></body></html>

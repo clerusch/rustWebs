@@ -1,0 +1,1 @@
+searchState.loadedDescShard("katexit", 0, "Crate docs.rs")
