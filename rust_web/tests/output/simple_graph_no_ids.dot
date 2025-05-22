@@ -1,9 +1,0 @@
-graph G {
-  node [style="filled", shape="circle", width="0.3", height="0.3", fixedsize="true", fontsize="12", fontname="Arial"];
-  edge [penwidth=2.0];
-  0 [color="green", shape="circle", label="", pos="0,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
-  2 [color="green", shape="circle", label="", pos="0,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
-  1 [color="red", shape="circle", label="π", pos="0,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
-  0 -- 1
-  1 -- 2
-}

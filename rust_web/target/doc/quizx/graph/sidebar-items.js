@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["BasisElem","EIter","EType","IncidentEdgeIter","NeighborIter","VIter","VType"],"struct":["Coord","VData"],"trait":["GraphLike"],"type":["V"]};

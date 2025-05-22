@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["DecompFunc","SimpFunc"],"fn":["terms_for_tcount"],"struct":["Decomposer"]};

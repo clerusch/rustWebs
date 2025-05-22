@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["FScalar"],"trait":["One","Zero"]};

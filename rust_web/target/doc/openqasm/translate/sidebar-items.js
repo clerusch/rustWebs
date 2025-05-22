@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Binop","LinearizeErrorKind","Unop"],"struct":["Linearize","LinearizeError","Value"],"trait":["ExprVisitor","GateWriter","ProgramVisitor"]};

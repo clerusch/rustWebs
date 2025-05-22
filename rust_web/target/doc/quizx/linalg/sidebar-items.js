@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["Mat2"],"trait":["ColOps","RowOps"]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["EigOwned","EigRef","EigWork"],"trait":["EigWorkImpl"]};

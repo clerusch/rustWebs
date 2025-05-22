@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["HouseholderWork","QWork"],"trait":["HouseholderWorkImpl","QWorkImpl"]};

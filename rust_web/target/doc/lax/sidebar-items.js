@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["alloc","cholesky","eig","eigh","eigh_generalized","error","flags","layout","least_squares","opnorm","qr","rcond","solve","solveh","svd","svddc","triangular","tridiagonal"],"trait":["Lapack"],"type":["Pivot"]};

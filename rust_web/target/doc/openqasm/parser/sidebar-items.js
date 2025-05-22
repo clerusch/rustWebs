@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["FilePolicy","FileResult","ParseError"],"struct":["Parser","SourceCache"]};

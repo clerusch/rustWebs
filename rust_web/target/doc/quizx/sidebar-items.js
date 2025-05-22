@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["annealer","basic_rules","circuit","decompose","extract","fscalar","gate","generate","graph","hash_graph","json","linalg","optimize_circuit","phase","random_graph","scalar_traits","simplify","tensor","util","vec_graph"]};

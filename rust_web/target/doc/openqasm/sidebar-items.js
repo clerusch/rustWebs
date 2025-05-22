@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Error"],"mod":["ast","parser","translate","typing"],"struct":["Errors"],"trait":["GenericError"]};
