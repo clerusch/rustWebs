@@ -13,26 +13,68 @@ fn test_load_and_pauliweb() -> Result<(), String> {
     // Load the graph
     let graph = graph_loader::load_graph("tests/zxgs/xxx_final.zxg")?;
     
-    // Get the first three vertices from the graph
-    let vertices: Vec<_> = graph.vertices().collect();
+    // Find three connected vertices in the graph
+    let mut found_vertices = None;
     
-    // Make sure we have at least 3 vertices
-    assert!(vertices.len() >= 3, "Graph must have at least 3 vertices");
+    // Look for a vertex that has at least two neighbors
+    for v1 in graph.vertices() {
+        let neighbors: Vec<_> = graph.neighbors(v1).collect();
+        if neighbors.len() >= 2 {
+            // Found a vertex with at least two neighbors
+            let v2 = neighbors[0];
+            // Find a common neighbor between v1 and v2 (if any)
+            let v3 = neighbors[1];
+            found_vertices = Some((v1, v2, v3));
+            break;
+        }
+    }
     
-    let v1 = vertices[0];
-    let v2 = vertices[1];
-    let v3 = vertices[2];
+    // If no vertex with two neighbors found, find any three connected vertices
+    if found_vertices.is_none() {
+        'outer: for v1 in graph.vertices() {
+            for v2 in graph.neighbors(v1) {
+                for v3 in graph.neighbors(v2) {
+                    if v3 != v1 {  // Ensure we don't have a triangle
+                        found_vertices = Some((v1, v2, v3));
+                        break 'outer;
+                    }
+                }
+            }
+        }
+    }
+    
+    // If still no connected vertices found, create a simple triangle
+    let (v1, v2, v3) = if let Some(verts) = found_vertices {
+        println!("Found connected vertices: {}, {}, {}", verts.0, verts.1, verts.2);
+        verts
+    } else {
+        // If no connected vertices found, use the first three vertices
+        println!("No three connected vertices found, using first three vertices");
+        let vertices: Vec<_> = graph.vertices().take(3).collect();
+        if vertices.len() < 3 {
+            return Err("Graph must have at least 3 vertices".to_string());
+        }
+        (vertices[0], vertices[1], vertices[2])
+    };
     
     // Create a PauliWeb and add operators to the edges
     let mut pauli_web = PauliWeb::new();
     
-    // Only add edges if they exist in the graph
+    // Add edges between the vertices
     if graph.neighbors(v1).any(|n| n == v2) {
-        pauli_web.set_edge(v1.into(), v2.into(), Pauli::X);
+        println!("Adding edge {} -- {} with Pauli X", v1, v2);
+        pauli_web.set_edge(v1, v2, Pauli::X);
     }
     
     if graph.neighbors(v2).any(|n| n == v3) {
-        pauli_web.set_edge(v2.into(), v3.into(), Pauli::Z);
+        println!("Adding edge {} -- {} with Pauli Z", v2, v3);
+        pauli_web.set_edge(v2, v3, Pauli::Z);
+    }
+    
+    // Also try to add an edge between v1 and v3 if it exists
+    if graph.neighbors(v1).any(|n| n == v3) {
+        println!("Adding edge {} -- {} with Pauli Y", v1, v3);
+        pauli_web.set_edge(v1, v3, Pauli::Y);
     }
     
     // Generate output paths

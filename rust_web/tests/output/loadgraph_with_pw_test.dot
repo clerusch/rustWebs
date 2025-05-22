@@ -49,7 +49,7 @@ graph G {
   19 [color="red", shape="circle", label="19", pos="9300,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
   41 [color="yellow", shape="box", label="", pos="9113,150!", style="filled", width="0.3", height="0.3", fixedsize="true"]
   0 -- 46
-  22 -- 41
+  22 -- 41 [color=blue]
   3 -- 32
   25 -- 27
   25 -- 28
@@ -97,7 +97,7 @@ graph G {
   16 -- 35
   38 -- 39
   38 -- 40
-  19 -- 22
+  19 -- 22 [color=red]
   19 -- 30
   19 -- 29
 }
