@@ -19,3 +19,10 @@ ndarray = "0.15.6"
 ndarray-linalg = { version = "0.16.0", features = ["openblas-system"] }
 nalgebra = { version = "0.32.3", features = ["std"] }
 
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+log = "0.4"
+env_logger = "0.10"
+anyhow = "1.0"
+

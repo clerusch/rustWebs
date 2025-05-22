@@ -35,9 +35,9 @@ impl PauliWeb {
     /// Get the color to use when drawing an edge
     pub fn get_edge_color(&self, from: usize, to: usize) -> Option<&'static str> {
         self.get_edge(from, to).map(|pauli| match pauli {
-            Pauli::X => "red",
-            Pauli::Y => "blue",
-            Pauli::Z => "green",
+            Pauli::X => "green",  // Green for X operators
+            Pauli::Y => "blue",   // Blue for Y operators
+            Pauli::Z => "red",    // Red for Z operators
         })
     }
 }
@@ -78,9 +78,9 @@ mod tests {
         pw.set_edge(2, 3, Pauli::Y);
         pw.set_edge(3, 4, Pauli::Z);
         
-        assert_eq!(pw.get_edge_color(1, 2), Some("red"));
+        assert_eq!(pw.get_edge_color(1, 2), Some("green"));
         assert_eq!(pw.get_edge_color(2, 3), Some("blue"));
-        assert_eq!(pw.get_edge_color(3, 4), Some("green"));
+        assert_eq!(pw.get_edge_color(3, 4), Some("red"));
         assert_eq!(pw.get_edge_color(4, 5), None); // Non-existent edge
     }
 

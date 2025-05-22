@@ -123,6 +123,25 @@ impl Mat2 {
         self.data.get(row).and_then(|r| r.get(col)).copied()
     }
     
+    /// Extract a submatrix from the matrix
+    pub fn submatrix(&self, start_row: usize, start_col: usize, rows: usize, cols: usize) -> Option<Self> {
+        if start_row + rows > self.rows() || start_col + cols > self.cols() {
+            return None;
+        }
+        
+        let mut result = Mat2::zeros(rows, cols);
+        
+        for i in 0..rows {
+            for j in 0..cols {
+                if let Some(val) = self.get(start_row + i, start_col + j) {
+                    result.set(i, j, val);
+                }
+            }
+        }
+        
+        Some(result)
+    }
+    
     /// Set the value at the specified position
     pub fn set(&mut self, row: usize, col: usize, value: F2) -> bool {
         if let Some(row_data) = self.data.get_mut(row) {
