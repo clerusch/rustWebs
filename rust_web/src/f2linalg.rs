@@ -94,11 +94,13 @@ impl Mat2 {
     pub fn zeros(m: usize, n: usize) -> Self {
         Mat2 { data: vec![vec![F2::Zero; n]; m] }
     }
-
+    
     /// Create a unit vector of size d with a 1 at position i
     pub fn unit_vector(d: usize, i: usize) -> Self {
         let mut data = vec![vec![F2::Zero]; d];
-        data[i][0] = F2::One;
+        if i < d {
+            data[i][0] = F2::One;
+        }
         Mat2 { data }
     }
 
@@ -140,6 +142,23 @@ impl Mat2 {
         
         let mut new_data = self.data.clone();
         new_data.extend_from_slice(&other.data);
+        
+        Mat2 { data: new_data }
+    }
+    
+    /// Horizontally stack this matrix with another matrix
+    pub fn hstack(&self, other: &Mat2) -> Mat2 {
+        if self.rows() != other.rows() {
+            panic!("Cannot stack matrices with different number of rows");
+        }
+        
+        let mut new_data = Vec::with_capacity(self.rows());
+        
+        for (row_self, row_other) in self.data.iter().zip(other.data.iter()) {
+            let mut new_row = row_self.clone();
+            new_row.extend_from_slice(row_other);
+            new_data.push(new_row);
+        }
         
         Mat2 { data: new_data }
     }
@@ -216,119 +235,113 @@ impl Mat2 {
     }
 
     /// Perform Gaussian elimination
+    /// 
+    /// # Arguments
+    /// * `full_reduce` - If true, compute the full row-reduced form
+    /// * `x` - Optional matrix to apply the same row operations to (x -> g * x)
+    /// * `y` - Optional matrix to apply the inverse column operations to (y -> y * g^-1)
+    /// * `blocksize` - Size of blocks for optimization (Patel/Markov/Hayes optimization)
+    /// * `pivot_cols` - Output parameter that will contain the pivot columns
     pub fn gauss(&mut self, full_reduce: bool, mut x: Option<&mut Mat2>, mut y: Option<&mut Mat2>, blocksize: usize, pivot_cols: &mut Vec<usize>) -> usize {
         let rows = self.rows();
         let cols = self.cols();
-        let mut pivot_row = 0;
-
+        let mut rank = 0;
+        
+        // Process in blocks for optimization
         for sec in 0..(cols + blocksize - 1) / blocksize {
             let i0 = sec * blocksize;
             let i1 = std::cmp::min(cols, (sec + 1) * blocksize);
-
-            // Search for duplicate chunks and eliminate them
-            let mut chunks = std::collections::HashMap::new();
-            for r in pivot_row..rows {
-                let t: Vec<F2> = self.data[r][i0..i1].to_vec();
-                if !t.iter().any(|&x| x != F2::Zero) {
-                    continue;
-                }
-                if let Some(&prev_row) = chunks.get(&t) {
-                    self.row_add(prev_row, r);
-                    if let Some(ref mut x) = x {
-                        x.row_add(prev_row, r);
-                    }
-                    if let Some(ref mut y) = y {
-                        y.col_add(r, prev_row);
-                    }
-                } else {
-                    chunks.insert(t, r);
-                }
-            }
-
-            let mut p = i0;
-            while p < i1 {
-                for r0 in pivot_row..rows {
-                    if self.data[r0][p] != F2::Zero {
-                        if r0 != pivot_row {
-                            self.row_add(r0, pivot_row);
-                            if let Some(ref mut x) = x {
-                                x.row_add(r0, pivot_row);
-                            }
-                            if let Some(ref mut y) = y {
-                                y.col_add(pivot_row, r0);
-                            }
-                        }
-
-                        for r1 in (pivot_row + 1)..rows {
-                            if pivot_row != r1 && self.data[r1][p] != F2::Zero {
-                                self.row_add(pivot_row, r1);
-                                if let Some(ref mut x) = x {
-                                    x.row_add(pivot_row, r1);
-                                }
-                                if let Some(ref mut y) = y {
-                                    y.col_add(r1, pivot_row);
-                                }
-                            }
-                        }
-                        pivot_cols.push(p);
-                        pivot_row += 1;
+            
+            // Process the current block
+            for p in i0..i1 {
+                // Find pivot row
+                let mut pivot_row = None;
+                for row in rank..rows {
+                    if self.data[row][p] == F2::One {
+                        pivot_row = Some(row);
                         break;
                     }
                 }
-                p += 1;
-            }
-        }
 
-        let rank = pivot_row;
-
-        if full_reduce {
-            let mut pivot_row = rank - 1;
-            let mut pivot_cols1 = pivot_cols.clone();
-
-            for sec in (0..(cols + blocksize - 1) / blocksize).rev() {
-                let i0 = sec * blocksize;
-                let i1 = std::cmp::min(cols, (sec + 1) * blocksize);
-
-                // Search for duplicate chunks and eliminate them
-                let mut chunks = std::collections::HashMap::new();
-                for r in (0..=pivot_row).rev() {
-                    let t: Vec<F2> = self.data[r][i0..i1].to_vec();
-                    if !t.iter().any(|&x| x != F2::Zero) {
-                        continue;
-                    }
-                    if let Some(&prev_row) = chunks.get(&t) {
-                        self.row_add(prev_row, r);
-                        if let Some(ref mut x) = x {
-                            x.row_add(prev_row, r);
+                if let Some(pivot) = pivot_row {
+                    // Swap rows if needed
+                    if pivot != rank {
+                        self.row_swap(rank, pivot);
+                        if let Some(x_mat) = &mut x {
+                            x_mat.row_swap(rank, pivot);
                         }
-                        if let Some(ref mut y) = y {
-                            y.col_add(r, prev_row);
+                        if let Some(y_mat) = &mut y {
+                            y_mat.col_swap(pivot, rank);
+                        }
+                    }
+
+
+                    // Eliminate other rows in the current block
+                    for row in rank + 1..rows {
+                        if self.data[row][p] == F2::One {
+                            self.row_add(rank, row);
+                            if let Some(x_mat) = &mut x {
+                                x_mat.row_add(rank, row);
+                            }
+                            if let Some(y_mat) = &mut y {
+                                y_mat.col_add(row, rank);
+                            }
+                        }
+                    }
+                    
+                    pivot_cols.push(p);
+                    rank += 1;
+                    
+                    if rank == rows {
+                        return rank;
+                    }
+                }
+            }
+            
+            // Eliminate duplicates in the current block
+            let mut chunks = std::collections::HashMap::new();
+            for row in rank..rows {
+                let chunk: Vec<F2> = self.data[row][i0..i1].to_vec();
+                if chunk.iter().any(|&x| x == F2::One) {
+                    if let Some(&r) = chunks.get(&chunk) {
+                        self.row_add(r, row);
+                        if let Some(x_mat) = &mut x {
+                            x_mat.row_add(r, row);
+                        }
+                        if let Some(y_mat) = &mut y {
+                            y_mat.col_add(row, r);
                         }
                     } else {
-                        chunks.insert(t, r);
-                    }
-                }
-
-                while !pivot_cols1.is_empty() && i0 <= pivot_cols1[pivot_cols1.len() - 1] && pivot_cols1[pivot_cols1.len() - 1] < i1 {
-                    let pcol = pivot_cols1.pop().unwrap();
-                    for r in 0..pivot_row {
-                        if self.data[r][pcol] != F2::Zero {
-                            self.row_add(pivot_row, r);
-                            if let Some(ref mut x) = x {
-                                x.row_add(pivot_row, r);
-                            }
-                            if let Some(ref mut y) = y {
-                                y.col_add(r, pivot_row);
-                            }
-                        }
-                    }
-                    if pivot_row > 0 {
-                        pivot_row -= 1;
+                        chunks.insert(chunk, row);
                     }
                 }
             }
         }
-
+        
+        // Full reduction if requested
+        if full_reduce && !pivot_cols.is_empty() {
+            let mut pivot_cols_rev = pivot_cols.clone();
+            pivot_cols_rev.reverse();
+            
+            for &pcol in &pivot_cols_rev {
+                // Find the pivot row for this column
+                if let Some(pivot_row) = (0..rank).find(|&r| self.data[r][pcol] == F2::One) {
+                    // Eliminate above the pivot
+                    for row in 0..pivot_row {
+                        if self.data[row][pcol] == F2::One {
+                            self.row_add(pivot_row, row);
+                            if let Some(x_mat) = &mut x {
+                                x_mat.row_add(pivot_row, row);
+                            }
+                            if let Some(y_mat) = &mut y {
+                                y_mat.col_add(row, pivot_row);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
         rank
     }
 
@@ -365,15 +378,60 @@ impl Mat2 {
             return None;
         }
         
-        let mut m = self.clone();
-        let mut inv = Mat2::id(self.rows());
-        let rank = m.gauss(true, Some(&mut inv), None, 6, &mut vec![]);
+        let n = self.rows();
         
-        if rank < self.rows() {
-            None
-        } else {
-            Some(inv)
+        // Special case for 2x2 matrices in F2
+        if n == 2 {
+            let a = self.data[0][0];
+            let b = self.data[0][1];
+            let c = self.data[1][0];
+            let d = self.data[1][1];
+            
+            // Compute determinant
+            let det = a * d + b * c;  // In F2, addition is XOR, so this is determinant
+            
+            if det == F2::Zero {
+                return None;  // Not invertible
+            }
+            
+            // For F2, the inverse is [d b; c a] / det, but since det=1 in F2, it's just [d b; c a]
+            let inv = Mat2::from_u8(vec![
+                vec![d as u8, b as u8],
+                vec![c as u8, a as u8],
+            ]);
+            
+            return Some(inv);
         }
+        
+        // General case for n x n matrices
+        
+        // Create augmented matrix [self | I]
+        let mut aug = Mat2::zeros(n, 2 * n);
+        for i in 0..n {
+            for j in 0..n {
+                aug.data[i][j] = self.data[i][j];
+                aug.data[i][j + n] = if i == j { F2::One } else { F2::Zero };
+            }
+        }
+        
+        // Perform Gaussian elimination to get [I | inv]
+        let mut pivot_cols = Vec::new();
+        let rank = aug.gauss(true, None, None, 6, &mut pivot_cols);
+        
+        // If the matrix is not full rank, it's not invertible
+        if rank < n {
+            return None;
+        }
+        
+        // Extract the inverse from the right half of the augmented matrix
+        let mut inv = Mat2::zeros(n, n);
+        for i in 0..n {
+            for j in 0..n {
+                inv.data[i][j] = aug.data[i][j + n];
+            }
+        }
+        
+        Some(inv)
     }
 
     /// Solve the linear system M * x = b
@@ -408,39 +466,62 @@ impl Mat2 {
         } else {
             self.clone() // We still need a copy to avoid mutating self
         };
-        m.gauss(true, None, None, 6, &mut vec![]);
+        
+        // Perform Gaussian elimination to get the matrix in reduced row echelon form
+        let mut pivot_cols = Vec::new();
+        m.gauss(true, None, None, 6, &mut pivot_cols);
         
         let cols = self.cols();
-        let mut nonpivots: Vec<usize> = (0..cols).collect();
-        let mut pivots = Vec::new();
+        let rank = pivot_cols.len();
         
-        for row in &m.data {
-            for j in 0..cols {
-                if row[j] != F2::Zero {
-                    if let Some(pos) = nonpivots.iter().position(|&x| x == j) {
-                        nonpivots.remove(pos);
-                    }
-                    if !pivots.contains(&j) {
-                        pivots.push(j);
-                    }
-                    break;
-                }
-            }
+        // If matrix is full rank, nullspace is empty
+        if rank == cols {
+            return Vec::new();
         }
         
-        let mut vectors = Vec::new();
-        for &n in &nonpivots {
-            let mut v = vec![F2::Zero; cols];
-            v[n] = F2::One;
-            for (row, &p) in m.data.iter().zip(&pivots) {
-                if row[n] != F2::Zero && p < v.len() {
-                    v[p] = F2::One;
+        // Find non-pivot columns (free variables)
+        let free_cols: Vec<usize> = (0..cols).filter(|&c| !pivot_cols.contains(&c)).collect();
+        
+        // For each free column, create a basis vector
+        let mut basis = Vec::with_capacity(free_cols.len());
+        
+        for &free_col in &free_cols {
+            // Start with a zero vector
+            let mut vec = vec![F2::Zero; cols];
+            // Set the free variable to 1
+            vec[free_col] = F2::One;
+            
+            // Back-substitute to find the values of the pivot variables
+            // We need to process rows in reverse order
+            for i in (0..m.rows().min(rank)).rev() {
+                // Find the pivot column for this row
+                let pivot_col = match pivot_cols.get(i) {
+                    Some(&col) => col,
+                    None => continue,
+                };
+                
+                // The value of the pivot variable is the sum of the products of the row elements
+                // and the corresponding vector elements, for columns after the pivot
+                let mut sum = F2::Zero;
+                for j in (pivot_col + 1)..cols {
+                    if m.data[i][j] == F2::One {
+                        sum = sum + vec[j];
+                    }
+                }
+                
+                // The pivot variable is set to this sum
+                if pivot_col < vec.len() {
+                    vec[pivot_col] = sum;
                 }
             }
-            vectors.push(Mat2 { data: v.into_iter().map(|x| vec![x]).collect() });
+            
+            // Add the basis vector to the result
+            basis.push(Mat2 { 
+                data: vec.into_iter().map(|x| vec![x]).collect() 
+            });
         }
         
-        vectors
+        basis
     }
 }
 

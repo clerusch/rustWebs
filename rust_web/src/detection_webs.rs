@@ -7,8 +7,12 @@ use quizx::graph::{GraphLike, VType};
 
 #[derive(Error, Debug)]
 pub enum DetectionWebsError {
-    #[error("Failed to convert matrix")]
-    MatrixConversionError,
+    #[error("Graph error: {0}")]
+    GraphError(String),
+    #[error("Matrix error: {0}")]
+    MatrixError(String),
+    #[error("Error: {0}")]
+    GenericError(String),
     #[error("Invalid graph structure")]
     InvalidGraph,
     #[error("Linear algebra operation failed")]
@@ -29,113 +33,164 @@ impl DetectionWebs {
 
     /// Get ordered nodes and their index mapping
     /// Returns a tuple of (ordered_nodes, index_map) where:
-    /// - ordered_nodes: Vector of node indices with outputs first, then non-outputs, then inputs
+    /// - ordered_nodes: Vector of node indices with outputs first, then non-outputs
     /// - index_map: Mapping from node index to its position in the ordered list
     fn ordered_nodes(&self) -> (Vec<usize>, HashMap<usize, usize>) {
         // Get all vertices
         let all_vertices: Vec<usize> = self.graph.vertices().collect();
         
-        // Separate vertices into categories
-        let outputs: Vec<usize> = self.graph.outputs().iter().cloned().collect();
-        let inputs: Vec<usize> = self.graph.inputs().iter().cloned().collect();
+        // Get output vertices first
+        let outputs: Vec<usize> = self.graph.outputs().to_vec();
         
-        // Get non-input, non-output vertices
-        let mut middle_vertices: Vec<usize> = all_vertices.iter()
-            .filter(|&&v| !outputs.contains(&v) && !inputs.contains(&v))
+        // Get non-output vertices (including inputs and other nodes)
+        let mut other_nodes: Vec<usize> = all_vertices.iter()
+            .filter(|&&v| !outputs.contains(&v))
             .cloned()
             .collect();
         
         // Sort for consistent ordering
-        middle_vertices.sort();
+        other_nodes.sort();
         
-        // Combine in order: outputs first, then middle vertices, then inputs
-        let mut ordered = outputs;
-        ordered.extend(middle_vertices);
-        ordered.extend(inputs);
+        // Combine outputs first, then other nodes
+        let ordered_nodes: Vec<usize> = outputs.into_iter().chain(other_nodes.into_iter()).collect();
         
         // Create index map
-        let index_map: HashMap<_, _> = ordered.iter()
+        let index_map: HashMap<_, _> = ordered_nodes.iter()
             .enumerate()
             .map(|(i, &v)| (v, i))
             .collect();
         
-        (ordered, index_map)
+        (ordered_nodes, index_map)
     }
 
     /// Convert the graph to RG form (Red-Green form)
     /// This implements the same logic as the Python version from detection_webs.py
     pub fn make_rg(mut self) -> Result<Self, DetectionWebsError> {
-        // Clone the graph to work on a copy while preserving the original
-        let mut working_graph = self.graph.clone();
         let mut modified = true;
+        let mut iteration = 0;
+        const MAX_ITERATIONS: usize = 100;  // Safety limit to prevent infinite loops
         
-        // We need to collect nodes first to avoid borrowing issues
-        let nodes: Vec<_> = working_graph.vertices().collect();
-        
-        for &node in &nodes {
-            let node_color = working_graph.vertex_type(node);
-            let neighbors: Vec<_> = working_graph.neighbor_vec(node);
+        while modified && iteration < MAX_ITERATIONS {
+            iteration += 1;
+            println!("RG conversion iteration {}", iteration);
+            modified = false;
+            let mut edges_to_process = Vec::new();
             
-            for &neighbor in &neighbors {
-                // Only process if both nodes have the same type
-                if working_graph.vertex_type(neighbor) == node_color {
-                    // Calculate position for the new vertex
-                    let _row = (working_graph.row(node) + working_graph.row(neighbor)) / 2.0;
-                    let _qubit = (working_graph.qubit(node) + working_graph.qubit(neighbor)) / 2.0;
-                    
-                    // Remove the edge between the nodes
-                    working_graph.remove_edge(node, neighbor);
-                    
-                    // Add a new vertex with the opposite color
-                    let new_color = match node_color {
-                        VType::X => VType::Z,  // Toggle between X and Z
-                        VType::Z => VType::X,
-                        _ => node_color,  // Keep other types as is
-                    };
-                    // Create a new vertex with the given color
-                    let new_vertex = working_graph.add_vertex(new_color);
-                    
-                    // Add edges for the new vertex
-                    for neighbor in working_graph.neighbor_vec(node) {
-                        if neighbor != node {  // Avoid self-loops
-                            working_graph.add_edge(new_vertex, neighbor);
-                        }
-                    }
-                    
-                    // We've modified the graph, so we need to break and restart
-                    // with the updated graph structure
-                    modified = true;
-                    break;
+            // First pass: collect edges to process
+            println!("  Current graph has {} vertices and {} edges", 
+                    self.graph.num_vertices(), self.graph.num_edges());
+            
+            // Collect all edges first to avoid borrowing issues
+            let edges: Vec<_> = self.graph.edges().collect();
+            
+            for (src, tgt, _) in edges {
+                let src_type = self.graph.vertex_type(src);
+                let tgt_type = self.graph.vertex_type(tgt);
+                
+                // We only process edges between nodes of the same type
+                if src_type == tgt_type && (src_type == VType::X || src_type == VType::Z) {
+                    println!("    Found edge between same-type nodes: {} ({:?}) - {} ({:?})", 
+                            src, src_type, tgt, tgt_type);
+                    edges_to_process.push((src, tgt));
                 }
             }
             
-            if modified {
+            if iteration >= MAX_ITERATIONS {
+                println!("WARNING: Reached maximum number of iterations ({}) in make_rg. Graph may not be in RG form.", MAX_ITERATIONS);
                 break;
+            }
+            
+            // Process edges in reverse order to avoid index shifting issues
+            for (src, tgt) in edges_to_process.into_iter().rev() {
+                // Skip if either node was already removed
+                if !self.graph.contains_vertex(src) || !self.graph.contains_vertex(tgt) {
+                    println!("    Skipping edge {} - {} (node already removed)", src, tgt);
+                    continue;
+                }
+                
+                println!("    Processing edge {} - {} (types: {:?})", 
+                        src, tgt, self.graph.vertex_type(src));
+                
+                // Get the neighbors of both nodes (excluding each other)
+                let src_neighbors: Vec<_> = self.graph.neighbor_vec(src)
+                    .into_iter()
+                    .filter(|&n| n != tgt)
+                    .collect();
+                
+                let tgt_neighbors: Vec<_> = self.graph.neighbor_vec(tgt)
+                    .into_iter()
+                    .filter(|&n| n != src)
+                    .collect();
+                
+                println!("      src neighbors (excluding tgt): {:?}", src_neighbors);
+                println!("      tgt neighbors (excluding src): {:?}", tgt_neighbors);
+                
+                // Remove the original edge
+                self.graph.remove_edge(src, tgt);
+                
+                // Add a new node of the opposite type
+                let new_node_type = match self.graph.vertex_type(src) {
+                    VType::X => VType::Z,
+                    VType::Z => VType::X,
+                    t => {
+                        println!("      Unexpected node type: {:?}", t);
+                        return Err(DetectionWebsError::GenericError("Unexpected node type".to_string()));
+                    }
+                };
+                
+                println!("      Adding new node of type {:?}", new_node_type);
+                let new_node = self.graph.add_vertex(new_node_type);
+                
+                // Connect the new node to the original nodes
+                println!("      Connecting new node to original nodes: {} and {}", src, tgt);
+                self.graph.add_edge(src, new_node);
+                self.graph.add_edge(tgt, new_node);
+                
+                // Connect the new node to all neighbors of src and tgt
+                for &n in &src_neighbors {
+                    println!("      Connecting new node to src's neighbor: {}", n);
+                    self.graph.add_edge(new_node, n);
+                }
+                
+                for &n in &tgt_neighbors {
+                    println!("      Connecting new node to tgt's neighbor: {}", n);
+                    self.graph.add_edge(new_node, n);
+                }
+                
+                modified = true;
+                println!("      Edge processing complete. Graph now has {} vertices and {} edges",
+                        self.graph.num_vertices(), self.graph.num_edges());
             }
         }
         
         // Update the graph in self with our modified version
-        self.graph = working_graph;
         Ok(self)
     }
 
     /// Get the detection webs for the graph
     pub fn get_detection_webs(&self) -> Result<Vec<PauliWeb>, DetectionWebsError> {
-        // Convert to RG form
+        use std::time::Instant;
+        
+        let start_time = Instant::now();
+        const TIMEOUT: std::time::Duration = std::time::Duration::from_secs(30); // 30 second timeout
+        
+        println!("Converting graph to RG form...");
         let rg_graph = self.clone().make_rg()?;
+        
+        if start_time.elapsed() > TIMEOUT {
+            return Err(DetectionWebsError::GenericError("Operation timed out during RG conversion".to_string()));
+        }
+        
+        println!("RG conversion complete in {:?}. Graph now has {} vertices and {} edges", 
+                start_time.elapsed(), rg_graph.graph.num_vertices(), rg_graph.graph.num_edges());
         
         // Get ordered nodes and index mapping
         let (new_order, index_map) = rg_graph.ordered_nodes();
-        let num_nodes = new_order.len();
-        // Get the number of inputs and outputs using non-mutating methods
-        let num_outputs = rg_graph.graph.inputs().len() + rg_graph.graph.outputs().len();
+        println!("Ordered nodes: {:?}", new_order);
+        println!("Index map: {:?}", index_map);
         
-        if num_nodes == 0 {
-            return Ok(Vec::new());
-        }
-        
-        // Create adjacency matrix
-        let mut adj_matrix = vec![vec![0u8; num_nodes]; num_nodes];
+        // Create a networkx-like graph for easier manipulation
+        let mut adj_matrix = vec![vec![0u8; new_order.len()]; new_order.len()];
         
         // Fill adjacency matrix
         for (i, &node) in new_order.iter().enumerate() {
@@ -146,59 +201,117 @@ impl DetectionWebs {
             }
         }
         
-        // Convert to Mat2
-        let n = adj_matrix.len();
-        let m = if n > 0 { adj_matrix[0].len() } else { 0 };
-        let mut mat = Mat2::zeros(n, m);
+        // Number of inputs + outputs
+        let outs = rg_graph.graph.inputs().len() + rg_graph.graph.outputs().len();
         
-        for i in 0..n {
-            for j in 0..m {
-                mat.set(i, j, F2::from_u8(adj_matrix[i][j]));
+        // Create mdl matrix (diagonal matrix with 1s for Z-spiders, 0s for X-spiders)
+        let mut mdl = Mat2::zeros(new_order.len(), new_order.len());
+        println!("Node types and indices:");
+        for (i, &node_idx) in new_order.iter().enumerate() {
+            println!("  Node {}: index={}, type={:?}", i, node_idx, self.graph.vertex_type(node_idx));
+            let node_type = self.graph.vertex_type(node_idx);
+            if let VType::Z = node_type {
+                mdl.set(i, i, F2::One);
             }
         }
         
-        // Create the matrix [I_n | N] as in the Python code
-        let mut extended_matrix = Mat2::zeros(num_nodes, num_nodes + num_outputs);
-        
-        // Set identity matrix in the first num_outputs rows and columns
-        for i in 0..num_outputs {
-            extended_matrix.set(i, i, F2::One);
+        println!("mdl matrix ({}x{}):", mdl.rows(), mdl.cols());
+        for i in 0..mdl.rows() {
+            print!("  [");
+            for j in 0..mdl.cols() {
+                match mdl.get(i, j) {
+                    Some(F2::One) => print!("1 "),
+                    Some(F2::Zero) => print!(". "),
+                    None => print!("? "),
+                }
+            }
+            println!("]");
         }
         
-        // Set the adjacency matrix in the remaining part
-        for i in 0..num_nodes {
-            for j in 0..num_nodes {
-                let val = mat.get(i, j).unwrap_or_else(|| F2::Zero);
-                extended_matrix.set(i, j + num_outputs, val);
+        // Create N matrix (adjacency matrix)
+        let mut n = Mat2::zeros(new_order.len(), new_order.len());
+        for i in 0..new_order.len() {
+            for j in 0..new_order.len() {
+                n.set(i, j, F2::from_u8(adj_matrix[i][j]));
             }
         }
         
-        // Add a stack of single-entry rows to eliminate outputs of the graphs firing vector
-        let mut full_matrix = extended_matrix;
-        let num_cols = full_matrix.cols();
+        println!("Adjacency matrix ({}x{}):", n.rows(), n.cols());
+        for i in 0..n.rows() {
+            print!("  [");
+            for j in 0..n.cols() {
+                match n.get(i, j) {
+                    Some(F2::One) => print!("1 "),
+                    Some(F2::Zero) => print!(". "),
+                    None => print!("? "),
+                }
+            }
+            println!("]");
+        }
         
-        // Add rows for outputs
-        for i in 0..num_outputs {
+        // Create md = [mdl | N] by horizontally stacking the matrices
+        let mut md = mdl.hstack(&n);
+        
+        println!("md matrix ({}x{}):", md.rows(), md.cols());
+        for i in 0..md.rows() {
+            print!("  [");
+            for j in 0..md.cols() {
+                match md.get(i, j) {
+                    Some(F2::One) => print!("1 "),
+                    Some(F2::Zero) => print!(". "),
+                    None => print!("? "),
+                }
+            }
+            println!("]");
+        }
+        
+        // Add single-entry rows to eliminate outputs of the graph's firing vector
+        for i in 0..outs {
             // For X output
-            let mut new_row = Mat2::zeros(1, num_cols);
-            new_row.set(0, i, F2::One);
-            full_matrix = full_matrix.vstack(&new_row);
+            let mut row = Mat2::zeros(1, md.cols());
+            row.set(0, i, F2::One);
+            md = md.vstack(&row);
             
             // For Z output
-            let mut new_row = Mat2::zeros(1, num_cols);
-            new_row.set(0, i + num_outputs, F2::One);
-            full_matrix = full_matrix.vstack(&new_row);
+            let mut row = Mat2::zeros(1, md.cols());
+            row.set(0, i + outs, F2::One);
+            md = md.vstack(&row);
         }
         
-        // Compute nullspace to get the detection webs
-        let nullspace = full_matrix.nullspace(true);
+        println!("Final matrix before nullspace ({}x{}):", md.rows(), md.cols());
+        for i in 0..md.rows() {
+            print!("  [");
+            for j in 0..md.cols() {
+                match md.get(i, j) {
+                    Some(F2::One) => print!("1 "),
+                    Some(F2::Zero) => print!(". "),
+                    None => print!("? "),
+                }
+            }
+            println!("]");
+        }
+        
+        // Compute nullspace with timeout check
+        println!("Computing nullspace...");
+        let nullspace_start = Instant::now();
+        let nullspace = md.nullspace(true);
+        
+        if start_time.elapsed() > TIMEOUT {
+            return Err(DetectionWebsError::GenericError("Operation timed out during nullspace computation".to_string()));
+        }
+        
+        println!("Found {} basis vectors in nullspace (took {:?})", nullspace.len(), nullspace_start.elapsed());
         
         // Convert nullspace vectors to PauliWebs
         let mut pauli_webs = Vec::new();
         
-        for vec in nullspace {
+        for (i, vec) in nullspace.into_iter().enumerate() {
+            println!("Processing nullspace vector {}: {:?}", i, vec);
             if let Some(pw) = self.vector_to_pauliweb(&vec, &new_order, &index_map) {
+                println!("  Converted to PauliWeb with {} edges", pw.edge_operators.len());
                 pauli_webs.push(pw);
+            } else {
+                println!("  Could not convert to PauliWeb (no valid edges)");
             }
         }
         
@@ -213,25 +326,24 @@ impl DetectionWebs {
         index_map: &HashMap<usize, usize>,
     ) -> Option<PauliWeb> {
         let mut pw = PauliWeb::new();
-        // Get the number of inputs and outputs using non-mutating methods
-        let num_outputs = self.graph.inputs().len() + self.graph.outputs().len();
+        let outs = self.graph.inputs().len() + self.graph.outputs().len();
         let mut has_edges = false;
         
-        // Process each non-zero entry in the vector
-        for (i, &node_idx) in new_order.iter().enumerate() {
-            // Use the public get method to access matrix elements
-            match vector.get(i, 0) {
-                Some(F2::Zero) => continue,
-                None => continue,
-                _ => {}
-            }
-            
-            let node_type = self.graph.vertex_type(node_idx);
-            
-            // Check if this is a node we should process (not an input/output)
-            if i >= num_outputs {
+        println!("  Processing vector with {} entries (outs: {})", vector.rows(), outs);
+        
+        // Get the non-zero indices in the vector
+        for i in outs..new_order.len() {
+            // Check if the vector component is non-zero
+            if let Some(F2::One) = vector.get(i, 0) {
+                let node_idx = new_order[i];
+                let node_type = self.graph.vertex_type(node_idx);
+                println!("    Node {} (type: {:?}) is set in vector", node_idx, node_type);
+                
                 // Get all edges connected to this node
-                for neighbor in self.graph.neighbor_vec(node_idx) {
+                let neighbors = self.graph.neighbor_vec(node_idx);
+                println!("      Node has {} neighbors: {:?}", neighbors.len(), neighbors);
+                
+                for neighbor in neighbors {
                     if let Some(&_j) = index_map.get(&neighbor) {
                         let edge = if node_idx < neighbor {
                             (node_idx, neighbor)
@@ -241,13 +353,23 @@ impl DetectionWebs {
                         
                         // Set the edge type based on the node type
                         let pauli = match node_type {
-                            VType::X => Pauli::X,  // X-spider
-                            VType::Z => Pauli::Z,  // Z-spider
-                            _ => continue,  // Skip other node types
+                            VType::X => {
+                                println!("      Adding X edge: {:?}", edge);
+                                Pauli::X  // X-spider -> X edge
+                            },
+                            VType::Z => {
+                                println!("      Adding Z edge: {:?}", edge);
+                                Pauli::Z  // Z-spider -> Z edge
+                            },
+                            _ => {
+                                println!("      Skipping non-X/Z node type: {:?}", node_type);
+                                continue  // Skip other node types
+                            },
                         };
                         
                         pw.set_edge(edge.0, edge.1, pauli);
                         has_edges = true;
+                        println!("      Edge added successfully");
                     }
                 }
             }
@@ -278,24 +400,41 @@ mod tests {
         // Create a simple graph for testing
         let mut graph = Graph::new();
         let v1 = graph.add_vertex(VType::WInput);  // Input
-        let v2 = graph.add_vertex(VType::X);  // X-spider
-        let v3 = graph.add_vertex(VType::Z);  // Z-spider
-        let v4 = graph.add_vertex(VType::WOutput);  // Output
+        let v2 = graph.add_vertex(VType::WInput);  // Input
+
+        let v3 = graph.add_vertex(VType::Z);  
+        let v4 = graph.add_vertex(VType::Z); 
+        let v5 = graph.add_vertex(VType::Z);
+        let v6 = graph.add_vertex(VType::Z);
+        let v7 = graph.add_vertex(VType::WOutput);
+        let v8 = graph.add_vertex(VType::WOutput);  // Output
         
-        graph.add_edge(v1, v2);
-        graph.add_edge(v2, v3);
+        graph.add_edge(v1, v3);
+        graph.add_edge(v2, v4);
         graph.add_edge(v3, v4);
+        graph.add_edge(v3,v5);
+        graph.add_edge(v4,v6);
+        graph.add_edge(v5,v6);
+        graph.add_edge(v5,v7);
+        graph.add_edge(v6,v8);
         
-        graph.set_inputs(vec![v1]);
-        graph.set_outputs(vec![v4]);
+        graph.set_inputs(vec![v1,v2]);
+        graph.set_outputs(vec![v7,v8]);
         
         let detector = DetectionWebs::new(graph);
-        let (ordered, _) = detector.ordered_nodes();
+        let (ordered, index_map) = detector.ordered_nodes();
         
-        // Check that outputs come first, then non-outputs
-        assert_eq!(ordered.len(), 4);  // All nodes should be included
-        assert_eq!(ordered[0], v4);    // Output should be first
-        assert_eq!(ordered[3], v1);    // Input should be last
+        // Check that all nodes are included
+        assert_eq!(ordered.len(), 8);
+        
+        // Check that outputs come first
+        assert_eq!(ordered[1], v8);  // Output should be first
+        assert_eq!(ordered[0], v7);  // Output should be first
+        
+        // Check that the index map is consistent
+        for (i, &v) in ordered.iter().enumerate() {
+            assert_eq!(index_map[&v], i);
+        }
     }
     
     // More tests would be needed for the full functionality

@@ -1,0 +1,385 @@
+graph G {
+  node [style="filled", shape="circle", width="0.3", height="0.3", fixedsize="true", fontsize="12", fontname="Arial"];
+  edge [penwidth=2.0];
+  0 [color="black", shape="circle", label="B", pos="-1500,1200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  88 [color="red", shape="circle", label="88", pos="600,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  151 [color="red", shape="circle", label="151", pos="3675,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  25 [color="green", shape="circle", label="25", pos="11850,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  113 [color="red", shape="circle", label="113", pos="4350,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  50 [color="red", shape="circle", label="50", pos="8700,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  138 [color="red", shape="circle", label="138", pos="3225,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  75 [color="green", shape="circle", label="75", pos="5400,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  12 [color="black", shape="circle", label="B", pos="12000,1200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  163 [color="green", shape="circle", label="163", pos="-750,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  100 [color="red", shape="circle", label="100", pos="1275,1000!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  37 [color="red", shape="circle", label="37", pos="5400,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  125 [color="green", shape="circle", label="125", pos="3450,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  62 [color="red", shape="circle", label="62", pos="11175,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  150 [color="green", shape="circle", label="150", pos="4800,900!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  87 [color="red", shape="circle", label="87", pos="375,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  24 [color="green", shape="circle", label="24", pos="10050,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  112 [color="green", shape="circle", label="112", pos="2775,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  49 [color="red", shape="circle", label="49", pos="-300,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  137 [color="green", shape="circle", label="137", pos="3225,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  74 [color="red", shape="circle", label="74", pos="9375,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  11 [color="black", shape="circle", label="B", pos="12000,1000!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  162 [color="green", shape="circle", label="162", pos="9375,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  99 [color="red", shape="circle", label="99", pos="1050,1100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  36 [color="green", shape="circle", label="36", pos="8925,1200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  124 [color="red", shape="circle", label="124", pos="3900,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  61 [color="red", shape="circle", label="61", pos="5850,700!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  149 [color="red", shape="circle", label="149", pos="2100,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  86 [color="green", shape="circle", label="86", pos="-1200,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  23 [color="green", shape="circle", label="23", pos="9825,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  111 [color="green", shape="circle", label="111", pos="4125,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  48 [color="red", shape="circle", label="48", pos="11625,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  136 [color="red", shape="circle", label="136", pos="5250,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  73 [color="red", shape="circle", label="73", pos="7200,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  10 [color="black", shape="circle", label="B", pos="-1500,600!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  161 [color="green", shape="circle", label="161", pos="9600,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  98 [color="green", shape="circle", label="98", pos="1725,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  35 [color="green", shape="circle", label="35", pos="10950,1100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  123 [color="green", shape="circle", label="123", pos="2775,600!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  60 [color="green", shape="circle", label="60", pos="-300,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  148 [color="red", shape="circle", label="148", pos="5025,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  85 [color="green", shape="circle", label="85", pos="375,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  22 [color="green", shape="circle", label="22", pos="8550,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  173 [color="green", shape="circle", label="173", pos="5850,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  110 [color="green", shape="circle", label="110", pos="2325,1200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  47 [color="red", shape="circle", label="47", pos="6975,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  135 [color="green", shape="circle", label="135", pos="5250,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  72 [color="green", shape="circle", label="72", pos="7875,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  9 [color="black", shape="circle", label="B", pos="-1500,700!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  160 [color="red", shape="circle", label="160", pos="10050,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  97 [color="green", shape="circle", label="97", pos="-1200,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  34 [color="red", shape="circle", label="34", pos="11850,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  122 [color="green", shape="circle", label="122", pos="5025,800!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  59 [color="green", shape="circle", label="59", pos="5625,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  147 [color="red", shape="circle", label="147", pos="5250,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  84 [color="green", shape="circle", label="84", pos="150,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  21 [color="green", shape="circle", label="21", pos="5400,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  172 [color="red", shape="circle", label="172", pos="10950,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  109 [color="green", shape="circle", label="109", pos="2100,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  46 [color="red", shape="circle", label="46", pos="8925,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  134 [color="red", shape="circle", label="134", pos="5250,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  71 [color="green", shape="circle", label="71", pos="-75,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  8 [color="black", shape="circle", label="B", pos="-1500,800!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  159 [color="green", shape="circle", label="159", pos="8700,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  96 [color="green", shape="circle", label="96", pos="1500,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  33 [color="red", shape="circle", label="33", pos="8100,900!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  121 [color="red", shape="circle", label="121", pos="2775,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  58 [color="red", shape="circle", label="58", pos="10500,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  146 [color="green", shape="circle", label="146", pos="2100,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  83 [color="red", shape="circle", label="83", pos="150,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  20 [color="green", shape="circle", label="20", pos="10950,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  171 [color="red", shape="circle", label="171", pos="6750,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  108 [color="red", shape="circle", label="108", pos="-1200,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  45 [color="red", shape="circle", label="45", pos="7650,1100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  133 [color="green", shape="circle", label="133", pos="4575,1000!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  70 [color="green", shape="circle", label="70", pos="8700,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  7 [color="black", shape="circle", label="B", pos="-1500,900!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  158 [color="red", shape="circle", label="158", pos="10725,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  95 [color="green", shape="circle", label="95", pos="1275,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  32 [color="green", shape="circle", label="32", pos="6975,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  120 [color="red", shape="circle", label="120", pos="4350,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  57 [color="red", shape="circle", label="57", pos="11850,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  145 [color="red", shape="circle", label="145", pos="4800,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  82 [color="red", shape="circle", label="82", pos="-75,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  19 [color="red", shape="circle", label="19", pos="10950,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  170 [color="green", shape="circle", label="170", pos="10725,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  107 [color="green", shape="circle", label="107", pos="1950,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  44 [color="red", shape="circle", label="44", pos="9375,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  132 [color="green", shape="circle", label="132", pos="3000,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  69 [color="green", shape="circle", label="69", pos="6750,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  6 [color="black", shape="circle", label="B", pos="-1500,1000!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  157 [color="green", shape="circle", label="157", pos="8550,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  94 [color="green", shape="circle", label="94", pos="1050,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  31 [color="green", shape="circle", label="31", pos="10275,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  119 [color="red", shape="circle", label="119", pos="-975,1200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  56 [color="red", shape="circle", label="56", pos="9150,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  144 [color="red", shape="circle", label="144", pos="2100,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  81 [color="red", shape="circle", label="81", pos="8700,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  18 [color="green", shape="circle", label="18", pos="6075,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  169 [color="green", shape="circle", label="169", pos="7200,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  106 [color="green", shape="circle", label="106", pos="1950,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  43 [color="red", shape="circle", label="43", pos="8700,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  131 [color="green", shape="circle", label="131", pos="2550,700!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  68 [color="green", shape="circle", label="68", pos="6525,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  5 [color="black", shape="circle", label="B", pos="12000,900!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  156 [color="green", shape="circle", label="156", pos="9150,700!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  93 [color="red", shape="circle", label="93", pos="1050,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  30 [color="green", shape="circle", label="30", pos="8550,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  118 [color="green", shape="circle", label="118", pos="4350,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  55 [color="red", shape="circle", label="55", pos="6075,600!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  143 [color="green", shape="circle", label="143", pos="3900,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  80 [color="green", shape="circle", label="80", pos="5400,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  17 [color="green", shape="circle", label="17", pos="6300,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  168 [color="red", shape="circle", label="168", pos="9825,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  105 [color="green", shape="circle", label="105", pos="1950,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  42 [color="green", shape="circle", label="42", pos="7425,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  130 [color="red", shape="circle", label="130", pos="-750,700!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  67 [color="red", shape="circle", label="67", pos="6525,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  4 [color="black", shape="circle", label="B", pos="12000,600!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  155 [color="red", shape="circle", label="155", pos="11850,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  92 [color="red", shape="circle", label="92", pos="825,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  29 [color="green", shape="circle", label="29", pos="11400,900!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  117 [color="green", shape="circle", label="117", pos="3675,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  54 [color="green", shape="circle", label="54", pos="6075,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  142 [color="red", shape="circle", label="142", pos="4575,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  79 [color="green", shape="circle", label="79", pos="8325,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  16 [color="green", shape="circle", label="16", pos="-525,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  167 [color="red", shape="circle", label="167", pos="11400,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  104 [color="green", shape="circle", label="104", pos="1950,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  41 [color="green", shape="circle", label="41", pos="7650,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  129 [color="red", shape="circle", label="129", pos="2325,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  66 [color="red", shape="circle", label="66", pos="8550,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  3 [color="black", shape="circle", label="B", pos="12000,700!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  154 [color="red", shape="circle", label="154", pos="6075,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  91 [color="green", shape="circle", label="91", pos="1050,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  28 [color="red", shape="circle", label="28", pos="5400,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  116 [color="red", shape="circle", label="116", pos="5250,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  53 [color="green", shape="circle", label="53", pos="7650,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  141 [color="red", shape="circle", label="141", pos="-525,600!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  78 [color="green", shape="circle", label="78", pos="9375,600!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  15 [color="red", shape="circle", label="15", pos="-1200,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  166 [color="red", shape="circle", label="166", pos="8325,800!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  103 [color="red", shape="circle", label="103", pos="1950,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  40 [color="red", shape="circle", label="40", pos="7425,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  128 [color="red", shape="circle", label="128", pos="2775,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  65 [color="green", shape="circle", label="65", pos="8550,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  2 [color="black", shape="circle", label="B", pos="12000,800!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  153 [color="green", shape="circle", label="153", pos="11175,1000!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  90 [color="green", shape="circle", label="90", pos="825,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  27 [color="green", shape="circle", label="27", pos="-525,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  115 [color="green", shape="circle", label="115", pos="4350,1100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  52 [color="red", shape="circle", label="52", pos="11850,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  140 [color="red", shape="circle", label="140", pos="3450,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  77 [color="green", shape="circle", label="77", pos="11625,800!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  14 [color="green", shape="circle", label="14", pos="-1200,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  165 [color="red", shape="circle", label="165", pos="9600,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  102 [color="red", shape="circle", label="102", pos="1725,800!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  39 [color="red", shape="circle", label="39", pos="5625,1200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  127 [color="red", shape="circle", label="127", pos="3000,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  64 [color="red", shape="circle", label="64", pos="7875,1000!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  1 [color="black", shape="circle", label="B", pos="-1500,1100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  152 [color="green", shape="circle", label="152", pos="-975,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  89 [color="green", shape="circle", label="89", pos="600,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  26 [color="red", shape="circle", label="26", pos="10275,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  114 [color="red", shape="circle", label="114", pos="4125,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  51 [color="red", shape="circle", label="51", pos="7650,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  139 [color="red", shape="circle", label="139", pos="2100,400!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  76 [color="green", shape="circle", label="76", pos="8100,200!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  13 [color="black", shape="circle", label="B", pos="12000,1100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  164 [color="green", shape="circle", label="164", pos="10500,300!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  101 [color="red", shape="circle", label="101", pos="1500,900!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  38 [color="red", shape="circle", label="38", pos="-525,0!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  126 [color="red", shape="circle", label="126", pos="2550,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  63 [color="red", shape="circle", label="63", pos="6300,100!", style="filled", width="0.3", height="0.3", fixedsize="true"]
+  0 -- 119
+  88 -- 89
+  88 -- 95
+  113 -- 124
+  113 -- 145
+  113 -- 118
+  50 -- 56
+  138 -- 151
+  75 -- 173
+  12 -- 36
+  100 -- 133
+  37 -- 67
+  125 -- 127
+  125 -- 140
+  62 -- 164
+  62 -- 153
+  87 -- 90
+  24 -- 58
+  24 -- 160
+  24 -- 165
+  112 -- 121
+  112 -- 146
+  49 -- 60
+  49 -- 71
+  137 -- 138
+  137 -- 143
+  74 -- 162
+  74 -- 161
+  11 -- 153
+  162 -- 170
+  99 -- 115
+  36 -- 46
+  36 -- 39
+  124 -- 125
+  124 -- 143
+  61 -- 173
+  61 -- 156
+  61 -- 131
+  23 -- 164
+  23 -- 70
+  23 -- 168
+  111 -- 112
+  111 -- 114
+  111 -- 118
+  48 -- 57
+  48 -- 77
+  136 -- 148
+  73 -- 169
+  10 -- 141
+  161 -- 165
+  161 -- 168
+  98 -- 107
+  98 -- 102
+  35 -- 45
+  35 -- 172
+  123 -- 128
+  123 -- 141
+  60 -- 83
+  148 -- 151
+  85 -- 98
+  85 -- 87
+  22 -- 79
+  110 -- 129
+  110 -- 119
+  47 -- 69
+  72 -- 73
+  9 -- 130
+  97 -- 163
+  34 -- 167
+  122 -- 148
+  122 -- 166
+  59 -- 69
+  84 -- 152
+  84 -- 87
+  21 -- 59
+  109 -- 137
+  46 -- 81
+  46 -- 160
+  134 -- 145
+  71 -- 82
+  71 -- 85
+  8 -- 102
+  159 -- 162
+  96 -- 101
+  96 -- 106
+  33 -- 150
+  33 -- 76
+  121 -- 126
+  121 -- 132
+  58 -- 164
+  83 -- 84
+  83 -- 89
+  20 -- 170
+  20 -- 25
+  45 -- 53
+  45 -- 115
+  133 -- 142
+  7 -- 101
+  158 -- 170
+  158 -- 172
+  95 -- 105
+  95 -- 100
+  32 -- 68
+  32 -- 79
+  32 -- 47
+  145 -- 150
+  82 -- 88
+  19 -- 58
+  19 -- 20
+  19 -- 167
+  44 -- 78
+  44 -- 165
+  132 -- 138
+  69 -- 171
+  6 -- 100
+  94 -- 104
+  94 -- 99
+  31 -- 160
+  31 -- 158
+  119 -- 152
+  56 -- 74
+  56 -- 156
+  18 -- 80
+  18 -- 55
+  169 -- 171
+  43 -- 44
+  5 -- 29
+  93 -- 103
+  30 -- 72
+  118 -- 135
+  55 -- 78
+  55 -- 123
+  17 -- 171
+  17 -- 18
+  17 -- 63
+  42 -- 53
+  42 -- 47
+  130 -- 163
+  130 -- 131
+  67 -- 73
+  67 -- 68
+  4 -- 78
+  155 -- 172
+  92 -- 93
+  29 -- 33
+  29 -- 167
+  117 -- 151
+  117 -- 140
+  54 -- 173
+  54 -- 63
+  54 -- 154
+  142 -- 147
+  142 -- 143
+  79 -- 166
+  16 -- 60
+  16 -- 86
+  16 -- 141
+  41 -- 76
+  41 -- 169
+  41 -- 51
+  129 -- 140
+  129 -- 139
+  3 -- 156
+  91 -- 93
+  91 -- 96
+  28 -- 154
+  116 -- 120
+  53 -- 157
+  15 -- 82
+  40 -- 42
+  40 -- 51
+  40 -- 154
+  128 -- 149
+  65 -- 76
+  2 -- 77
+  90 -- 92
+  90 -- 94
+  27 -- 163
+  27 -- 49
+  27 -- 38
+  115 -- 120
+  52 -- 62
+  77 -- 166
+  14 -- 152
+  102 -- 122
+  39 -- 59
+  39 -- 110
+  127 -- 128
+  127 -- 132
+  64 -- 72
+  64 -- 133
+  64 -- 153
+  1 -- 99
+  89 -- 91
+  26 -- 31
+  26 -- 168
+  26 -- 48
+  114 -- 117
+  114 -- 120
+  51 -- 66
+  13 -- 35
+  101 -- 150
+  38 -- 92
+  38 -- 108
+  126 -- 144
+  126 -- 131
+  63 -- 68
+}
