@@ -29,7 +29,7 @@ pub struct DetectionWebs {
 impl DetectionWebs {
     /// Create a new DetectionWebs instance from a ZX graph
     pub fn new(graph: Graph) -> Self {
-        Self { graph }
+        Self {graph: make_rg(graph) }
     }
 
     /// Get ordered nodes and their index mapping
@@ -72,23 +72,10 @@ impl DetectionWebs {
 
     /// Get the detection webs for the graph
     pub fn get_detection_webs(&self) -> Result<Vec<PauliWeb>, DetectionWebsError> {
-        use std::time::Instant;
         
-        let start_time = Instant::now();
-        const TIMEOUT: std::time::Duration = std::time::Duration::from_secs(30); // 30 second timeout
-        
-        println!("Converting graph to RG form...");
-        let rg_graph = Self::new(make_rg(self.graph.clone()));
-        
-        if start_time.elapsed() > TIMEOUT {
-            return Err(DetectionWebsError::GenericError("Operation timed out during RG conversion".to_string()));
-        }
-        
-        println!("RG conversion complete in {:?}. Graph now has {} vertices and {} edges", 
-                start_time.elapsed(), rg_graph.graph.num_vertices(), rg_graph.graph.num_edges());
         
         // Get ordered nodes and index mapping
-        let (new_order, index_map) = rg_graph.ordered_nodes();
+        let (new_order, index_map) = self.ordered_nodes();
         println!("Ordered nodes: {:?}", new_order);
         println!("Index map: {:?}", index_map);
         
@@ -101,7 +88,7 @@ impl DetectionWebs {
             log::debug!("Processing node {} at position {}", node, i);
             
             // Get neighbors with error handling
-            let neighbors = rg_graph.graph.neighbor_vec(node);
+            let neighbors = self.graph.neighbor_vec(node);
             log::debug!("Node {} has {} neighbors", node, neighbors.len());
             
             for &neighbor in &neighbors {
@@ -121,35 +108,26 @@ impl DetectionWebs {
         }
         
         // Number of inputs + outputs
-        let _outs = rg_graph.graph.inputs().len() + rg_graph.graph.outputs().len();
+        let outs = self.graph.inputs().len() + self.graph.outputs().len();
         
         // Create mdl matrix (diagonal matrix with 1s for Z-spiders, 0s for X-spiders)
         let mut mdl = Mat2::zeros(new_order.len(), new_order.len());
         log::debug!("Creating MDL matrix for {} nodes", new_order.len());
         
         // Get all vertices in the RG graph
-        let rg_vertices: Vec<_> = rg_graph.graph.vertices().collect();
-        log::debug!("RG graph has {} vertices: {:?}", rg_vertices.len(), rg_vertices);
-        
-        // Verify all nodes in new_order exist in the RG graph
-        for &node_idx in &new_order {
-            if !rg_vertices.contains(&node_idx) {
-                let err_msg = format!("Node {} not found in RG graph. Available vertices: {:?}", node_idx, rg_vertices);
-                log::error!("{}", err_msg);
-                return Err(DetectionWebsError::InvalidGraph(err_msg));
-            }
-        }
+        let vertices: Vec<_> = self.graph.vertices().collect();
+        log::debug!("Graph has {} vertices: {:?}", vertices.len(), vertices);
         
         log::debug!("Node types and indices ({} nodes):", new_order.len());
         for (i, &node_idx) in new_order.iter().enumerate() {
             // Verify node exists in RG graph before accessing its type
-            if !rg_vertices.contains(&node_idx) {
-                let err_msg = format!("Node {} not found in RG graph when accessing vertex type. Available vertices: {:?}", node_idx, rg_vertices);
+            if !vertices.contains(&node_idx) {
+                let err_msg = format!("Node {} not found in RG graph when accessing vertex type. Available vertices: {:?}", node_idx, vertices);
                 log::error!("{}", err_msg);
                 return Err(DetectionWebsError::InvalidGraph(err_msg));
             }
             
-            let node_type = rg_graph.graph.vertex_type(node_idx);
+            let node_type = self.graph.vertex_type(node_idx);
             match node_type {
                 VType::Z => {
                     log::trace!("Node {} at position {} is type Z, setting MDL[{}][{}] = 1", node_idx, i, i, i);
@@ -182,17 +160,17 @@ impl DetectionWebs {
             }
         }
         
-        println!("Adjacency matrix ({}x{}):", n.rows(), n.cols());
+        log::trace!("Adjacency matrix ({}x{}):", n.rows(), n.cols());
         for i in 0..n.rows() {
-            print!("  [");
+            log::trace!("  [");
             for j in 0..n.cols() {
                 match n.get(i, j) {
-                    Some(F2::One) => print!("1 "),
-                    Some(F2::Zero) => print!(". "),
-                    None => print!("? "),
+                    Some(F2::One) => log::trace!("1 "),
+                    Some(F2::Zero) => log::trace!(". "),
+                    None => log::trace!("? "),
                 }
             }
-            println!("]");
+            log::trace!("]");
         }
         
         // Create [I_n | N] matrix where I_n is identity of size outs x outs
@@ -222,24 +200,24 @@ impl DetectionWebs {
                 no_output.set(i, i, F2::One);
             }
             
-            println!("md dimensions: {}x{}", md.rows(), md.cols());
-            println!("no_output dimensions: {}x{}", no_output.rows(), no_output.cols());
+            log::trace!("md dimensions: {}x{}", md.rows(), md.cols());
+            log::trace!("no_output dimensions: {}x{}", no_output.rows(), no_output.cols());
             
             // Stack md and no_output vertically
             md.vstack(&no_output)
         } else {
             // If no outputs, just use md as is
-            println!("No outputs detected, skipping output constraints");
+            log::trace!("No outputs detected, skipping output constraints");
             md
         };
-        
+        println!("Md_no_output looks like: {}", md_no_output);
         // Compute nullspace with timeout check
         println!("Computing nullspace...");
         // Get a basis for the nullspace of the augmented matrix
         let nullspace_basis = md_no_output.nullspace(true);
         let basis_size = nullspace_basis.len();
         
-        log::info!("Found {} basis vectors for the nullspace (dimension {})", 
+        println!("Found {} basis vectors for the nullspace (dimension {})", 
                   basis_size, basis_size);
         
         // Convert each basis vector to a PauliWeb
@@ -254,7 +232,7 @@ impl DetectionWebs {
             }
         }
         
-        log::info!("Successfully converted {} out of {} basis vectors to PauliWebs", 
+        println!("Successfully converted {} out of {} basis vectors to PauliWebs", 
                   detection_webs.len(), basis_size);
         
         Ok(detection_webs)
