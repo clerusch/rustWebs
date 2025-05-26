@@ -99,7 +99,8 @@ def get_detection_webs(g:zx.Graph) -> List[PauliWeb]:
     md = Mat2(np.hstack((mdl, N)))
     
     # adds a stack of single-entry rows to eliminate outputs of the graphs firing vector
-    no_output = np.hstack((np.eye(2*outs, dtype=np.uint8), np.zeros((2*outs, len(md.data[0])-2*outs), dtype=np.uint8)))
+    no_output = np.hstack((np.eye(2*outs, dtype=np.uint8), \
+        np.zeros((2*outs, len(md.data[0])-2*outs), dtype=np.uint8)))
     md_no_output = Mat2(np.vstack((md.data, no_output)))
     mdnons = np.hstack([np.array(vec.data)for vec in md_no_output.nullspace()])
     

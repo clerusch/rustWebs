@@ -2,7 +2,8 @@ use quizx::hash_graph::Graph;
 use quizx::graph::{GraphLike, VType};
 use std::collections::HashSet;
 
-pub fn make_rg(mut oldg: Graph) -> Graph {
+pub fn make_rg(oldg: &mut Graph) -> () {
+    // Modifies a graph in-place to make it in red-green form
     let mut visited: HashSet<(usize, usize)> = HashSet::new();
 
     loop {
@@ -56,8 +57,6 @@ pub fn make_rg(mut oldg: Graph) -> Graph {
             break;
         }
     }
-
-    oldg
 }
 
 // Tests
@@ -79,8 +78,8 @@ mod tests {
         // Debug output
         println!("Original graph: {} vertices, {} edges", graph.num_vertices(), graph.num_edges());
         // Apply RG transformation
-        let result = make_rg(graph);
-        println!("Transformed graph: {} vertices, {} edges", result.num_vertices(), result.num_edges());
+        make_rg(&mut graph);
+        println!("Transformed graph: {} vertices, {} edges", graph.num_vertices(), graph.num_edges());
         
         // In RG form, we expect:
         // 1. Original edge v1-v2 is removed
@@ -88,18 +87,18 @@ mod tests {
         // 3. The new Z node is connected to both original nodes
         // Since this is a simple graph with just two connected nodes,
         // we expect exactly 2 edges in the transformed graph
-        assert_eq!(result.num_vertices(), 3, "Should have 3 vertices (2 original X nodes + 1 new Z node)");
-        assert_eq!(result.num_edges(), 2, "Should have 2 edges (v1-new_node and v2-new_node)");
+        assert_eq!(graph.num_vertices(), 3, "Should have 3 vertices (2 original X nodes + 1 new Z node)");
+        assert_eq!(graph.num_edges(), 2, "Should have 2 edges (v1-new_node and v2-new_node)");
         
         // Verify the new node is of type Z
-        let new_node = result.vertices()
+        let new_node = graph.vertices()
             .find(|&v| v != v1 && v != v2)
             .expect("Should have a new node");
             
-        assert_eq!(result.vertex_type(new_node), VType::Z, "New node should be of type Z");
+        assert_eq!(graph.vertex_type(new_node), VType::Z, "New node should be of type Z");
         
         // Verify connections
-        assert!(result.connected(v1, new_node), "v1 should be connected to new node");
-        assert!(result.connected(v2, new_node), "v2 should be connected to new node");
+        assert!(graph.connected(v1, new_node), "v1 should be connected to new node");
+        assert!(graph.connected(v2, new_node), "v2 should be connected to new node");
     }
 }

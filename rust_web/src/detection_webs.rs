@@ -108,7 +108,7 @@ impl DetectionWebs {
         }
         
         // Number of inputs + outputs
-        let outs = self.graph.inputs().len() + self.graph.outputs().len();
+        let _outs = self.graph.inputs().len() + self.graph.outputs().len();
         
         // Create mdl matrix (diagonal matrix with 1s for Z-spiders, 0s for X-spiders)
         let mut mdl = Mat2::zeros(new_order.len(), new_order.len());

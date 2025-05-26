@@ -11,7 +11,7 @@ fn main()-> Result<(), Box<dyn std::error::Error>>{
         .join("zxgs")
         .join("steane_style_steane_2_rounds.zxg");
     println!("Loading graph from: {}", graph_path.display());
-    let graph = load_graph(graph_path.to_str().unwrap())?;
+    let mut graph = load_graph(graph_path.to_str().unwrap())?;
     let name = "steane_style_steane_2_rounds".to_owned();
     
     graph_to_png(
@@ -20,10 +20,10 @@ fn main()-> Result<(), Box<dyn std::error::Error>>{
         &(name.clone()+".png"),
         None,true)?;
     println!("Made it to after drawing first one");
-    let rg_graph: Graph = make_rg(graph);
+    make_rg(&mut graph);
     println!("At least got graph before saving");
     graph_to_png(
-        &rg_graph,
+        &graph,
          &(name.clone()+"_rg.dot"),
           &(name.clone()+"_rg.png"),
            None, true
