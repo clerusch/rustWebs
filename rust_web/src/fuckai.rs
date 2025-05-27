@@ -10,38 +10,56 @@ use crate::pauliweb::PauliWeb;
 use crate::pauliweb::Pauli;
 use std::collections::BTreeSet;
 
-fn get_adjacency_matrix(g: &Graph) -> Mat2 {
-    let vertices: Vec<V> = g.vertices().collect();
-    let n = vertices.len();
-    // Create a new matrix and fill it
+fn get_adjacency_matrix(g: &Graph, nodelist: &[V]) -> Mat2 {
+    let n = nodelist.len();
     let mut adj = Mat2::new(n, n);
-    for i in 0..n {
-        for j in 0..n {
-            let connected = g.connected(vertices[i], vertices[j]);
+    
+    // Fill the adjacency matrix
+    for (i, &u) in nodelist.iter().enumerate() {
+        for (j, &v) in nodelist.iter().enumerate() {
+            // Check both directions since the graph is undirected
+            let connected = g.connected(u, v) || g.connected(v, u);
             adj.set(i, j, connected);
         }
     }
-    return adj
+    
+    adj
 }
 
 
 fn ordered_nodes(g: &Graph) -> (Vec<usize>, HashMap<usize, usize>) {
-    // This is for keeping track of original node ordering
-    let original: Vec<usize> = g.vertices().collect();
+    // Get all vertices and sort them for consistent ordering
+    let mut original: Vec<usize> = g.vertices().collect();
+    original.sort();
+    
+    // First put outputs (nodes that are neither inputs nor outputs in the original graph)
     let outputs: Vec<usize> = original.iter()
-        .filter(|&&v| g.vertex_type(v) == VType::WOutput || g.vertex_type(v) == VType::WInput)
+        .filter(|&&v| !g.inputs().contains(&v) && !g.outputs().contains(&v))
         .cloned()
         .collect();
     
-    let mut vertices: Vec<usize> = outputs;
-    vertices.extend(original.into_iter());
+    // Then add the rest (inputs and outputs) that have type != 0 (B type is 0 in Python)
+    let mut vertices = outputs.clone();
+    vertices.extend(
+        original.iter()
+            .filter(|&&v| {
+                let vtype = g.vertex_type(v);
+                vtype != VType::B && !outputs.contains(&v)
+            })
+            .cloned()
+    );
     
-    let index_map: HashMap<usize, usize> = vertices.iter()
+    // Create index map (matrix index -> original node index)
+    let index_map: HashMap<usize, usize> = vertices
+        .iter()
         .enumerate()
-        .map(|(idx, &item)| (item, idx))
+        .map(|(i, &v)| (i, v))
         .collect();
     
-    return (vertices, index_map)
+    log::debug!("Ordered vertices: {:?}", vertices);
+    log::debug!("Index map: {:?}", index_map);
+    
+    (vertices, index_map)
 }
 
 pub fn get_pw(index_map: &HashMap<usize, usize>, v: &BitVec<usize, Lsb0>, g: &Graph) -> PauliWeb {
@@ -89,57 +107,81 @@ fn draw_mat(name: &str, mat: &Mat2) {
     for i in 0..mat.rows() {
         let row: String = (0..mat.cols())
             .map(|j| if mat.get(i, j) { '1' } else { '0' })
-            .collect();
-        log::debug!("{}", row);
+            .collect::<Vec<char>>()
+            .chunks(4)  // Group into chunks of 4 for better readability
+            .map(|chunk| chunk.iter().collect::<String>())
+            .collect::<Vec<String>>()
+            .join(" ");  // Add space between chunks
+        log::debug!("[{}]", row);
     }
 }
 
-pub fn get_detection_webs(g: &mut Graph)-> Vec<PauliWeb> {
+pub fn get_detection_webs(g: &mut Graph) -> Vec<PauliWeb> {
+    // First convert to RG form
     make_rg(g);
-    // let outs = g.inputs().len() + g.outputs().len();
-    // Count the number of boundary nodes (VType::B)
-    let outs = g.vertices()
-        .filter(|&v| g.vertex_type(v) == VType::B)
-        .count();
-    let (_vertices, index_map) = ordered_nodes(&g);
+    
+    // Get number of inputs + outputs
+    let outs = g.inputs().len() + g.outputs().len();
+    
+    // Get ordered nodes and index map
+    let (nodelist, index_map) = ordered_nodes(g);
+    log::debug!("Ordered nodes: {:?}", nodelist);
     log::debug!("outs: {}", outs);
     
-    // See borghans master thesis for this part
-    let big_n = get_adjacency_matrix(&g);
-    draw_mat("big_n", &big_n);
+    // Get adjacency matrix in the specified node order
+    let big_n = get_adjacency_matrix(g, &nodelist);
+    draw_mat("N (adjacency)", &big_n);
+    
+    // Create I_n (identity matrix of size outs x outs)
     let i_n = Mat2::id(outs);
-    draw_mat("i_n", &i_n);
-    let zeroblock = Mat2::zeros(big_n.cols() -outs,  outs);
+    draw_mat("I_n", &i_n);
+    
+    // Create zero block of size (n - outs) x outs
+    let zeroblock = Mat2::zeros(big_n.rows() - outs, outs);
     draw_mat("zeroblock", &zeroblock);
+    
+    // Stack I_n on top of zeroblock vertically
     let mdl = i_n.vstack(&zeroblock);
-    draw_mat("mdl",&mdl);
+    draw_mat("mdl", &mdl);
+    
+    // Horizontally concatenate mdl and big_n
     let md = mdl.hstack(&big_n);
     draw_mat("md", &md);
     
-    // adds a stack of single-entry rows to eliminate outputs of the graph
-    let zeros =  Mat2::zeros(2*outs, big_n.rows()-2*outs);
-    draw_mat("zeros",&zeros);
-    let no_output = Mat2::id(2*outs).hstack(&zeros);
-    draw_mat("no_output", &no_output);
-
-    let md_no_output = md.vstack(&no_output);
+    // Create the no_output matrix that will be stacked below md
+    // This is [I_{2*outs} | 0] where I is identity and 0 is zero matrix
+    let eye_part = Mat2::id(2 * outs);
+    let zero_part = Mat2::zeros(2 * outs, md.cols() - 2 * outs);
+    let no_output = eye_part.hstack(&zero_part);
     
-    // Log the final matrix in a readable format
+    // Vertically stack md and no_output
+    let md_no_output = md.vstack(&no_output);
     draw_mat("md_no_output", &md_no_output);
     
+    // Compute nullspace
     let mdnons = md_no_output.nullspace(false);
+    log::debug!("Number of basis vectors in nullspace: {}", mdnons.len());
     
-    let mut pws = Vec::new();
-    log::debug!("mdnons: {:#?}", mdnons);
-    for basis in mdnons {
-        // Create a bitvector from the basis vector
-        let mut vec = bitvec![0; basis.rows()];
-        for i in 0..basis.rows() {
-            vec.set(i, basis.get(i, 0));
+    // Convert each basis vector to a PauliWeb
+    let mut pws = Vec::with_capacity(mdnons.len());
+    for (i, basis) in mdnons.into_iter().enumerate() {
+        log::debug!("Basis vector {}: {}", i, basis);
+        
+        // The basis vector is a row vector from the nullspace
+        // We need to extract its elements to create our bitvector
+        log::debug!("Creating bitvector of length: {}", basis.cols());
+        let mut vec = bitvec![0; basis.cols()];
+        for i in 0..basis.cols() {
+            // Get the value from the basis row vector
+            let val = basis.get(0, i);
+            log::debug!("Setting bit {} to {}", i, val);
+            vec.set(i, val);
         }
-        log::debug!("basis vector: {:#?}", vec);
-        let pw = get_pw(&index_map, &vec, &g);
+        log::debug!("Bitvector: {:#?}", vec);
+        // Create and store the PauliWeb
+        let pw = get_pw(&index_map, &vec, g);
         pws.push(pw);
     }
+    
     pws
 }

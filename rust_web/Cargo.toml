@@ -3,6 +3,18 @@ name = "rust_web"
 version = "0.1.0"
 edition = "2024"
 
+[profile.release]
+opt-level = 3          # Maximize optimization
+lto = true             # Enable Link Time Optimization
+debug = false          # Explicitly disable debug info
+strip = true           # Remove debug symbols
+panic = 'abort'        # Optional: smaller binary by aborting on panic
+codegen-units = 1      # Optimize aggressively
+
+[[bin]]
+name = "benchmark"
+path = "src/bin/benchmark.rs"
+
 [dependencies]
 num = "0.4.3"
 num-rational = "0.4.2"
@@ -19,14 +31,13 @@ ndarray = "0.15.6"
 ndarray-linalg = { version = "0.16.0", features = ["openblas-system"] }
 nalgebra = { version = "0.32.3", features = ["std"] }
 
+# Logging
+env_logger = "0.10"
+log = "0.4"
+
 # Bit manipulation
 bitvec = "1.0"
 
-# Logging
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-log = "0.4"
-env_logger = "0.10"
 anyhow = "1.0"
 rustc-hash = "2.1.1"
 

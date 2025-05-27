@@ -52,9 +52,16 @@ pub fn to_dot_with_positions<G: GraphLike>(
 ) -> String {
     let mut result = String::new();
     result.push_str("graph G {\n");
-    // Set default node attributes for consistent sizing
-    result.push_str("  node [style=\"filled\", shape=\"circle\", width=\"0.3\", height=\"0.3\", fixedsize=\"true\", fontsize=\"12\", fontname=\"Arial\"];\n");
-    result.push_str("  edge [penwidth=2.0];\n");  // Make edges thicker for better visibility
+    // Set graph properties for better layout
+    result.push_str("  graph [splines=true, overlap=false, pad=\"0.5\", nodesep=\"0.5\", ranksep=\"1.0\"];\n");
+    
+    // Set default node attributes for consistent sizing and appearance
+    result.push_str("  node [style=\"filled\", shape=\"circle\", width=\"0.6\", height=\"0.6\", fixedsize=\"true\", \n");
+    result.push_str("       fontsize=\"24\", fontname=\"Arial\", penwidth=\"1.5\", labelloc=\"c\"];\n");
+    result.push_str("  node [fontname=\"Arial\"];\n");  // Set default font for all text elements
+    
+    // Set default edge style
+    result.push_str("  edge [penwidth=2.0, color=\"#666666\"];\n");  // Default edge color is gray
 
     // Calculate positions and collect vertex info
     let mut vertices = Vec::new();
@@ -77,46 +84,110 @@ pub fn to_dot_with_positions<G: GraphLike>(
     // Add vertices
     for v in graph.vertices() {
         let data = graph.vertex_data(v);
-        let (color, shape, label) = match data.ty {
+        let (fill_color, border_color, shape, label, font_color) = match data.ty {
             quizx::graph::VType::Z => {
                 let phase_str = format_phase(data.phase.to_f64());
-                let label = if show_node_ids {
-                    if phase_str.is_empty() {
-                        format!("{}", v)
-                    } else {
-                        format!("{}\n({})", phase_str, v)
-                    }
+                let label = if phase_str.is_empty() {
+                    if show_node_ids { v.to_string() } else { String::new() }
                 } else {
                     phase_str
                 };
-                ("green", "circle", label)
+                ("#88ff88", "#000000", "circle", label, "#000000")  // Brighter green fill, black border
             },
             quizx::graph::VType::X => {
                 let phase_str = format_phase(data.phase.to_f64());
-                let label = if show_node_ids {
-                    if phase_str.is_empty() {
-                        format!("{}", v)
-                    } else {
-                        format!("{}\n({})", phase_str, v)
-                    }
+                let label = if phase_str.is_empty() {
+                    if show_node_ids { v.to_string() } else { String::new() }
                 } else {
                     phase_str
                 };
-                ("red", "circle", label)
+                ("#ff8888", "#000000", "circle", label, "#000000")  // Brighter red fill, black border
             },
-            quizx::graph::VType::H => ("yellow", "box", String::new()),
-            quizx::graph::VType::B => ("black", "circle", "B".to_string()),
-            _ => ("white", "circle", String::new()),
+            quizx::graph::VType::H => {
+                ("#ffff88", "#000000", "square", String::new(), "#000000")  // Brighter yellow fill, black border
+            },
+            quizx::graph::VType::B => {
+                ("#000000", "#000000", "circle", String::from("B"), "#ffffff")  // Black box with white text
+            },
+            _ => {
+                ("#ffffff", "#000000", "circle", String::new(), "#000000")  // Default white circle
+            },
         };
 
         let x = (data.row * time_spacing).round() as i32;
         let y = ((data.qubit - min_qubit) * grid_spacing).round() as i32;
         let pos = format!("{},{}!", x, y);
         
-        vertices.push(format!(
-            "  {} [color=\"{}\", shape=\"{}\", label=\"{}\", pos=\"{}\", style=\"filled\", width=\"0.3\", height=\"0.3\", fixedsize=\"true\"]",
-            v, color, shape, label, pos
-        ));
+        // Create HTML-like label with ID above and phase inside
+        let html_label = if show_node_ids || !label.is_empty() {
+            let id_part = if show_node_ids {
+                // Escape special characters in node ID
+                let escaped_id = v.to_string()
+                    .replace('&', "&amp;")
+                    .replace('<', "&lt;")
+                    .replace('>', "&gt;")
+                    .replace('"', "&quot;");
+                format!("<font point-size='12'>{}</font><br/>", escaped_id)
+            } else {
+                String::new()
+            };
+            let phase_part = if !label.is_empty() {
+                // Escape special characters in phase label
+                let escaped_label = label
+                    .replace('&', "&amp;")
+                    .replace('<', "&lt;")
+                    .replace('>', "&gt;")
+                    .replace('"', "&quot;");
+                format!("<font point-size='16'>{}</font>", escaped_label)
+            } else {
+                String::new()
+            };
+            format!("label=<<table border='0' cellborder='0' cellspacing='0' cellpadding='0'>\
+                   <tr><td align='center'>{}{}</td></tr></table>>", id_part, phase_part)
+        } else {
+            String::new()
+        };
+        
+        let mut node_attrs = Vec::new();
+        if !html_label.is_empty() {
+            node_attrs.push(html_label);
+        }
+
+        let mut attrs = vec![
+            format!("pos=\"{}\"", pos),
+            format!("shape=\"{}\"", shape),
+            format!("fillcolor=\"{}\"", fill_color),
+            format!("color=\"{}\"", border_color),
+            "style=\"filled,solid\"".to_string(),
+            "width=0.6".to_string(),
+            "height=0.6".to_string(),
+            "fixedsize=true".to_string(),
+            format!("fontcolor=\"{}\"", font_color),
+            "labelloc=\"c\"".to_string(),  // Center the label inside the node
+        ];
+        
+        // Add all node attributes
+        attrs.extend(node_attrs);
+        
+        // Make H nodes slightly larger
+        if data.ty == quizx::graph::VType::H {
+            attrs.push("shape=square".to_string());
+            attrs.push("margin=0.1".to_string());
+        }
+        
+        if data.ty == quizx::graph::VType::H {
+            // Make H-boxes square and slightly larger
+            attrs.push("width=0.4".to_string());
+            attrs.push("height=0.4".to_string());
+        }
+        
+        // Ensure node ID is properly quoted if it contains special characters
+        let node_id = if v.to_string().chars().any(|c| !c.is_ascii_alphanumeric() && c != '_') {
+            format!("\"{}\"", v)
+        } else {
+            v.to_string()
+        };
+        vertices.push(format!("  {} [{}]", node_id, attrs.join(",")));
     }
 
     // Add vertices to the DOT string
@@ -129,17 +200,35 @@ pub fn to_dot_with_positions<G: GraphLike>(
     for v in graph.vertices() {
         for n in graph.neighbors(v) {
             if v < n {  // Only add each edge once
-                let edge_style = if let Some(pauli_web) = pauli_web {
-                    if let Some(color) = pauli_web.get_edge_color(v.into(), n.into()) {
-                        format!(" [color={}]", color)
-                    } else {
-                        "".to_string()
-                    }
-                } else {
-                    "".to_string()
-                };
+                // Default edge style (black)
+                let mut edge_attrs = vec![
+                    "len=1.0".to_string(),
+                    "penwidth=1.5".to_string(),
+                    "color=\"#000000\"".to_string(),
+                    "style=solid".to_string()
+                ];
                 
-                result.push_str(&format!("  {} -- {}{}\n", v, n, edge_style));
+                // Custom styling for Pauli web edges
+                if let Some(pauli_web) = pauli_web {
+                    if let Some(pauli) = pauli_web.get_edge(v.into(), n.into()) {
+                        let (color, penwidth) = match pauli {
+                            crate::pauliweb::Pauli::X => ("#ff0000", "2.5"),  // Red for X
+                            crate::pauliweb::Pauli::Z => ("#00aa00", "2.5"),  // Green for Z
+                            _ => ("#0000ff", "2.0"),                         // Blue for others
+                        };
+                        
+                        // Update edge attributes for Pauli web edges
+                        edge_attrs = vec![
+                            "len=1.0".to_string(),
+                            format!("penwidth={}", penwidth),
+                            format!("color=\"{}\"", color),
+                            "style=bold".to_string()
+                        ];
+                    }
+                }
+                
+                // Add the edge with final attributes
+                result.push_str(&format!("  {} -- {} [{}]\n", v, n, edge_attrs.join(",")));
             }
         }
     }

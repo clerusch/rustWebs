@@ -357,7 +357,8 @@ mod tests {
         // No need to import graph_loader since we're already in that module
         use super::*;  // This will import everything from the parent module
 
-        let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+        let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
+            .unwrap_or_else(|_| ".".to_string());
         let path = std::path::Path::new(&manifest_dir)
             .join("tests")
             .join("zxgs")

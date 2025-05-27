@@ -15,7 +15,5 @@ pub use graph_visualizer::draw_graph_with_pauliweb;
 pub use pauliweb::PauliWeb;
 pub use graph_loader::load_graph;
 pub use quizx::hash_graph::Graph;
-pub use f2linalg::F2;
-
-// Re-export for external use
 pub use quizx::graph::GraphLike;
+pub use f2linalg::F2;

@@ -1,7 +1,7 @@
 import pyzx as zx 
-from lib.graph_loader import load_graph
+from graph_loader import load_graph
 import networkx as nx
-from f2linalg.f2linalg import Mat2
+from f2linalg import Mat2
 import numpy as np
 from pyzx.pauliweb import PauliWeb
 from typing import Dict, Tuple, List
@@ -93,10 +93,15 @@ def get_detection_webs(g:zx.Graph) -> List[PauliWeb]:
     
     # See borghan's master thesis for this part
     N = nx.to_numpy_array(ng, nodelist=new_order, dtype=np.uint8)
+    # print("N:", N)
     I_n = np.eye(outs, dtype=np.uint8)
+    # print("I_n:", I_n)
     zeroblock = np.zeros((N.shape[1]-outs, outs), dtype=np.uint8)
+    # print("zeroblock:", zeroblock)
     mdl = np.vstack((I_n, zeroblock))
+    # print("mdl:", mdl)
     md = Mat2(np.hstack((mdl, N)))
+    # print("md:", md)
     
     # adds a stack of single-entry rows to eliminate outputs of the graphs firing vector
     no_output = np.hstack((np.eye(2*outs, dtype=np.uint8), \
