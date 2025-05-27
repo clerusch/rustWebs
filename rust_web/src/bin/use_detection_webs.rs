@@ -2,7 +2,7 @@ use rust_web::{
     graph_loader::load_graph,
     detection_webs::get_detection_webs,
     graph_visualizer,
-    make_rg::make_rg,
+    make_rg::make_rg
 };
 use std::error::Error;
 use std::path::PathBuf;
@@ -140,7 +140,7 @@ pub fn use_det_web(path: &str) -> Result<(), Box<dyn Error>> {
         temp_dot_files.lock().unwrap().push(dot_path.clone());
         
         // Generate DOT content for this specific web
-        let web_dot_content = graph_visualizer::to_dot_with_positions(&graph, Some(&web), false);
+        let web_dot_content = graph_visualizer::to_dot_with_positions(&*graph, Some(&web), false);
         
         // Write the DOT file
         if let Err(e) = std::fs::write(&dot_path, &web_dot_content) {
