@@ -4,7 +4,6 @@ use std::env;
 use std::path::Path;
 use std::time::Instant;
 use rayon::prelude::*;
-use std::sync::Mutex;
 
 // Import necessary functions from the library
 use rust_web::{
@@ -71,7 +70,6 @@ fn main() {
     
     // 6. Visualize each web in parallel (just for timing, discard the results)
     let web_vis_start = Instant::now();
-    let webs_ref = &webs;  // Create a reference for the closure
     webs.par_iter().for_each(|web| {
         let _ = graph_visualizer::to_dot_with_positions(&graph, Some(web), false);
     });

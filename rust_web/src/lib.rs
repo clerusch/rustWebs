@@ -2,7 +2,6 @@
 pub mod tikz_export;
 pub mod create_graph;
 pub mod graph_loader;
-pub mod f2linalg;
 pub mod graph_visualizer;
 pub mod pauliweb;
 // pub mod detection_webs;
@@ -16,4 +15,3 @@ pub use pauliweb::PauliWeb;
 pub use graph_loader::load_graph;
 pub use quizx::hash_graph::Graph;
 pub use quizx::graph::GraphLike;
-pub use f2linalg::F2;
