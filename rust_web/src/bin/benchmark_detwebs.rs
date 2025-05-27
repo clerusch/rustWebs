@@ -11,10 +11,7 @@ use rust_web::{
     detection_webs::get_detection_webs,
     graph_visualizer,
     make_rg::make_rg,
-    GraphLike
 };
-// GraphLike trait is used for set_inputs/set_outputs methods
-
 fn main() {
     // Initialize logger
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
@@ -55,8 +52,8 @@ fn main() {
     info!("make_rg completed in: {:?}", make_rg_start.elapsed());
     
     // 3. Set inputs and outputs
-    graph.set_outputs(vec![132, 131, 94, 125, 169, 97, 170]);
-    graph.set_inputs(vec![19, 20, 21, 45, 46, 47, 48]);
+    // graph.set_outputs(vec![132, 131, 94, 125, 169, 97, 170]);
+    // graph.set_inputs(vec![19, 20, 21, 45, 46, 47, 48]);
     
     // 4. Generate detection webs
     let detection_start = Instant::now();

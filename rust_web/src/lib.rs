@@ -4,11 +4,12 @@ pub mod create_graph;
 pub mod graph_loader;
 pub mod graph_visualizer;
 pub mod pauliweb;
-// pub mod detection_webs;
 pub mod make_rg;
 pub mod detection_webs;
 pub mod bitwisef2linalg;
-// Re-export commonly used items for easier access
+
+// Re-export detection_web function from the binary target
+// pub use use_detection_webs::use_det_web;
 // pub use detection_webs::DetectionWebs;
 pub use graph_visualizer::draw_graph_with_pauliweb;
 pub use pauliweb::PauliWeb;

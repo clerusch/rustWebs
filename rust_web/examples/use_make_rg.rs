@@ -1,7 +1,6 @@
 use rust_web::graph_loader::load_graph;
 use rust_web::make_rg::make_rg;
 use rust_web::graph_visualizer::graph_to_png;
-use quizx::hash_graph::Graph;
 
 fn main()-> Result<(), Box<dyn std::error::Error>>{
     // Load the Steane code graph

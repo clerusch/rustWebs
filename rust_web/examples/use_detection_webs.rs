@@ -11,9 +11,7 @@ use std::process::{Command, Stdio};
 use std::env;
 use std::io::Write;
 use std::time::Instant;
-use std::sync::{Arc, Mutex};
 use log::{info, error, debug};
-use rayon::prelude::*;
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Initialize logger
@@ -127,80 +125,37 @@ pub fn use_det_web(path: &str) -> Result<(), Box<dyn Error>> {
     info!("Found {} detection webs", webs.len());
     
     let web_vis_start = Instant::now();
-    let temp_dot_files = Arc::new(Mutex::new(Vec::new()));
-    let graph = Arc::new(graph); // Share the graph between threads
-    
-    // Process webs in parallel
-    let results: Vec<anyhow::Result<()>> = webs.into_par_iter().enumerate().map(|(i, web)| {
+    for (i, web) in webs.into_iter().enumerate() {
         let web_start = Instant::now();
         let web_output_path = output_dir.join(format!("web_{}.png", i + 1));
-        let dot_path = output_dir.join(format!("temp_web_{}.dot", i + 1));
-        
-        // Add to temp files list
-        temp_dot_files.lock().unwrap().push(dot_path.clone());
-        
-        // Generate DOT content for this specific web
-        let web_dot_content = graph_visualizer::to_dot_with_positions(&graph, Some(&web), false);
-        
-        // Write the DOT file
-        if let Err(e) = std::fs::write(&dot_path, &web_dot_content) {
-            return Err(anyhow::anyhow!("Failed to write DOT file for web {}: {}", i + 1, e));
-        }
+        let _dot_path = output_dir.join(format!("temp_web_{}.dot", i + 1));
+        let mut file = std::fs::File::create(&_dot_path)?;
+        writeln!(file, "{}", graph_visualizer::to_dot_with_positions(&graph, Some(&web), true))?;
         debug!("  Web {} dot generation took: {:?}", i + 1, web_start.elapsed());
+         // Generate DOT content for this specific web
+         let web_dot_content = graph_visualizer::to_dot_with_positions(&graph, Some(&web), false);
         
-        // Process with neato
         let neato_start = Instant::now();
-        let output = Command::new("neato")
+        let mut neato = Command::new("neato")
             .args(["-n2", "-Tpng"])
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .spawn()
-            .and_then(|mut child| {
-                if let Some(stdin) = child.stdin.as_mut() {
-                    stdin.write_all(web_dot_content.as_bytes())?;
-                }
-                child.wait_with_output()
-            });
+            .spawn()?;
             
-        match output {
-            Ok(output) if output.status.success() => {
-                if let Err(e) = std::fs::write(&web_output_path, output.stdout) {
-                    return Err(anyhow::anyhow!("Failed to write PNG for web {}: {}", i + 1, e));
-                }
-                debug!("  Web {} processing took: {:?}", i + 1, neato_start.elapsed());
-                info!("  Web {} completed in: {:?}", i + 1, web_start.elapsed());
-                Ok(())
-            },
-            Ok(output) => {
-                let stderr = String::from_utf8_lossy(&output.stderr);
-                Err(anyhow::anyhow!("neato failed for web {} with status {}: {}", 
-                    i + 1, output.status, stderr))
-            },
-            Err(e) => Err(anyhow::anyhow!("Failed to execute neato for web {}: {}", i + 1, e)),
+        if let Some(stdin) = neato.stdin.as_mut() {
+            stdin.write_all(web_dot_content.as_bytes())?;
         }
-    }).collect();
-    
-    // Check for any errors in the parallel processing
-    for result in results {
-        if let Err(e) = result {
-            error!("Error processing web: {}", e);
-            // Continue processing other webs but return an error at the end
+        
+        let output = neato.wait_with_output()?;
+        if !output.status.success() {
+            return Err(format!("Failed to generate detection web {}", i + 1).into());
         }
+        
+        std::fs::write(&web_output_path, output.stdout)?;
+        debug!("  Web {} processing took: {:?}", i + 1, neato_start.elapsed());
+        info!("  Web {} completed in: {:?}", i + 1, web_start.elapsed());
     }
     info!("All webs visualization took: {:?}", web_vis_start.elapsed());
-    
-    // Clean up temporary DOT files
-    let cleanup_start = Instant::now();
-    let temp_files = temp_dot_files.lock().unwrap();
-    let cleanup_errors = temp_files.par_iter()
-        .filter(|dot_file| std::fs::remove_file(dot_file).is_err())
-        .count();
-    
-    if cleanup_errors > 0 {
-        log::warn!("Failed to remove {} temporary files", cleanup_errors);
-    } else if !temp_files.is_empty() {
-        debug!("Cleaned up {} temporary DOT files in {:?}", temp_files.len(), cleanup_start.elapsed());
-    }
     
     info!("Total execution time: {:?}", total_start.elapsed());
     Ok(())

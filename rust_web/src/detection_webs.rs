@@ -119,6 +119,15 @@ fn draw_mat(name: &str, mat: &Mat2) {
 pub fn get_detection_webs(g: &mut Graph) -> Vec<PauliWeb> {
     // First convert to RG form
     make_rg(g);
+
+    // Lets make the whole outputs thing native:
+    let mut outputs = Vec::new();
+    for v in g.vertices() {
+        if g.vertex_type(v) == VType::B {
+            outputs.push(v);
+        }
+    }
+    g.set_outputs(outputs);
     
     // Get number of inputs + outputs
     let outs = g.inputs().len() + g.outputs().len();
