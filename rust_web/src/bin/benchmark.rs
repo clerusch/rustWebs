@@ -3,6 +3,8 @@ use log::{info, error};
 use std::env;
 use std::path::Path;
 use std::time::Instant;
+use rayon::prelude::*;
+use std::sync::Mutex;
 
 // Import necessary functions from the library
 use rust_web::{
@@ -67,12 +69,26 @@ fn main() {
     let _ = graph_visualizer::to_dot_with_positions(&graph, None, false);
     info!("Main graph visualization generated in: {:?}", vis_start.elapsed());
     
-    // 6. Visualize each web (just for timing, discard the results)
+    // 6. Visualize each web in parallel (just for timing, discard the results)
     let web_vis_start = Instant::now();
-    for web in webs.into_iter() {
-        let _ = graph_visualizer::to_dot_with_positions(&graph, Some(&web), false);
-    }
+    let webs_ref = &webs;  // Create a reference for the closure
+    webs.par_iter().for_each(|web| {
+        let _ = graph_visualizer::to_dot_with_positions(&graph, Some(web), false);
+    });
     info!("All web visualizations completed in: {:?}", web_vis_start.elapsed());
+    
+    // 7. Process detection webs in parallel (if they can be processed independently)
+    let parallel_web_start = Instant::now();
+    let webs_processed: Vec<_> = webs
+        .par_iter()
+        .map(|web| {
+            // Process each web independently here
+            // This is a placeholder - replace with actual processing
+            web.clone()
+        })
+        .collect();
+    info!("Parallel web processing completed in: {:?}", parallel_web_start.elapsed());
+    info!("Processed {} webs", webs_processed.len());
     
     info!("Total execution time: {:?}", total_start.elapsed());
 }
