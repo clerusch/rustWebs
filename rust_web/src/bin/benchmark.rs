@@ -8,7 +8,7 @@ use rayon::prelude::*;
 // Import necessary functions from the library
 use rust_web::{
     graph_loader::load_graph,
-    fuckai::get_detection_webs,
+    detection_webs::get_detection_webs,
     graph_visualizer,
     make_rg::make_rg,
     GraphLike

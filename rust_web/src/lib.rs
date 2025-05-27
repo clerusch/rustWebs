@@ -6,7 +6,7 @@ pub mod graph_visualizer;
 pub mod pauliweb;
 // pub mod detection_webs;
 pub mod make_rg;
-pub mod fuckai;
+pub mod detection_webs;
 pub mod bitwisef2linalg;
 // Re-export commonly used items for easier access
 // pub use detection_webs::DetectionWebs;
