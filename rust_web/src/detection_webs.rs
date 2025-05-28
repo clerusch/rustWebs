@@ -11,6 +11,7 @@ use crate::pauliweb::Pauli;
 use std::collections::BTreeSet;
 
 fn get_adjacency_matrix(g: &Graph, nodelist: &[V]) -> Mat2 {
+    // Takes a quizx graph and returns the adjacency matrix of the graph in the order of nodelist
     let n = nodelist.len();
     let mut adj = Mat2::new(n, n);
     
@@ -25,7 +26,6 @@ fn get_adjacency_matrix(g: &Graph, nodelist: &[V]) -> Mat2 {
     
     adj
 }
-
 
 fn ordered_nodes(g: &Graph) -> (Vec<usize>, HashMap<usize, usize>) {
     // Get all vertices and sort them for consistent ordering
@@ -115,7 +115,11 @@ fn draw_mat(name: &str, mat: &Mat2) {
         log::debug!("[{}]", row);
     }
 }
-
+/// Returns all detection webs of a quizx graph
+/// Will inplace convert the graph to rg form
+/// 
+/// TODO: perhaps handle the input/output stuff, currently we break it and just assume thats not a set
+/// property
 pub fn get_detection_webs(g: &mut Graph) -> Vec<PauliWeb> {
     // First convert to RG form
     make_rg(g);
